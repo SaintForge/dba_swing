@@ -79,7 +79,7 @@ class SettingsData
 		this.mtmPort = mtmPort;
 	}
 	
-	public String getProfieUser() {
+	public String getProfileUser() {
 		return profileUser;
 	}
 	public void setProfileUser(String profileUser) {
@@ -136,8 +136,8 @@ class SettingsDialog extends JDialog
 		this.prevComponent = this.panel;
 		
 		int w = 300;
-    	int h = 250;
-    	setPreferredSize(new Dimension(w, h));
+		int h = 250;
+		setPreferredSize(new Dimension(w, h));
 		
 		addElement("Name:");
 		addElement("SQL Server:");
@@ -187,9 +187,34 @@ class SettingsDialog extends JDialog
 		setResizable(false);
 	}
 	
-	public static SettingsData createDialog(JFrame parent)
+	SettingsDialog(Frame owner, String title, SettingsData settings)
+	{
+		this(owner,title);
+		
+		this.settings = settings;
+		
+		setProperty("Name:", settings.getName());
+		setProperty("SQL Server:", settings.getSqlServer());
+		setProperty("MTM Port:", settings.getMtmPort());
+		setProperty("Profile User:", settings.getProfileUser());
+		setProperty("Profile Password:", settings.getProfilePassword());
+		
+		System.out.println("settings SQL Server:" + getProperty("SQL Server:"));
+	}
+	
+	public static SettingsData createNewDialog(JFrame parent)
 	{
 		SettingsDialog dialog = new SettingsDialog(parent, "New Environment");
+		
+		dialog.pack();
+		dialog.setVisible(true);
+		
+		return dialog.settings;
+	}
+	
+	public static SettingsData updateNewDialog(JFrame parent, SettingsData settings)
+	{
+		SettingsDialog dialog = new SettingsDialog(parent, settings.getName(), settings);
 		
 		dialog.pack();
 		dialog.setVisible(true);
@@ -218,30 +243,79 @@ class SettingsDialog extends JDialog
 		}
 		return "";
 	}
+	
+	public String setProperty(String name, String property)
+	{
+		for (int i = 0; i < this.panel.getComponents().length; i++)
+		{
+			Component child = this.panel.getComponent(i);
+			if (((child instanceof JTextField)) && (child.getName() != null) && (child.getName().equalsIgnoreCase(name))) 
+			{
+				
+				((JTextField)child).setText(property);
+			}
+		}
+		return "";
+	}
 }
 
 class EnvironmentData
 {
-	SettingsData settings = new SettingsData();
+	SettingsData settings;
 	// ArrayList<T> data;
+	
+	EnvironmentData(SettingsData settings) 
+	{
+		this.settings = new SettingsData();
+		
+		this.settings.setName(settings.getName());
+		this.settings.setSqlServer(settings.getSqlServer());
+		this.settings.setMtmPort(settings.getMtmPort());
+		this.settings.setProfileUser(settings.getProfileUser());
+		this.settings.setProfilePassword(settings.getProfilePassword());
+	}
+	
+	public SettingsData getSettings() 
+	{
+		return settings;
+	}
+	
+	public void setSettings(SettingsData settings) 
+	{
+		this.settings = settings;
+	}
 }
 
-class DBForm
+class DBForm implements ActionListener
 {
+	JFrame frame;
 	EnvironmentData data;
 	JPanel panel = new JPanel(new GridBagLayout());
 	
-	DBForm(SettingsData settings)
+	JButton refreshAllButton;
+	JButton settingsButton;
+	JButton refreshTableButton;
+	
+	DBForm(SettingsData settings, JFrame frame)
 	{
+		this.frame = frame;
+		data = new EnvironmentData(settings);
+		
 		JPanel tableList = createNewTable("Table Name", "Description");
 		JPanel tableInfo = createNewTable("Properties", "Value");
 		JPanel fieldList = createNewTable("Field Name", "Description");
 		JPanel fieldInfo = createNewTable("Properties", "Value");
 		
+		refreshAllButton = new JButton("Refresh");
+		refreshAllButton.addActionListener(this);
+		
+		settingsButton = new JButton("Settings");
+		settingsButton.addActionListener(this);
+		
 		JTextField tableSearch = new JTextField();
 		this.panel.add(tableSearch,  new GridBagConstraints(0, 0, 1, 1, 1.0, 0.01, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(2, 2, 2, 2), 100, 0));
-		this.panel.add(new JButton("Refresh"),  new GridBagConstraints(2, 0, 1, 1, 1.0, 0.01, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(2, 2, 2, 80), 0, 0));
-		this.panel.add(new JButton("Settings"),  new GridBagConstraints(2, 0, 1, 1, 1.0, 0.01, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(2, 2, 2, 2), 0, 0));
+		this.panel.add(refreshAllButton,  new GridBagConstraints(2, 0, 1, 1, 1.0, 0.01, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(2, 2, 2, 80), 0, 0));
+		this.panel.add(settingsButton,  new GridBagConstraints(2, 0, 1, 1, 1.0, 0.01, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(2, 2, 2, 2), 0, 0));
 		
 		JTextField fieldSearch = new JTextField();
 		this.panel.add(fieldSearch,  new GridBagConstraints(3, 0, 1, 1, 1.0, 0.01, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(2, 2, 2, 2), 100, 0));
@@ -286,22 +360,36 @@ class DBForm
 		this.panel = panel;
 	}
 	
-	public static DBForm createNewForm(SettingsData settings)
+	public static DBForm createNewForm(SettingsData settings, JFrame frame)
 	{
-		DBForm dbForm = new DBForm(settings);
+		DBForm dbForm = new DBForm(settings, frame);
 		return dbForm;
+	}
+	
+	public void actionPerformed(ActionEvent event) 
+	{
+		if (event.getSource() == refreshAllButton) {
+			System.out.println("refreshAllButton");
+		}
+		if (event.getSource() == settingsButton) 
+		{
+			System.out.println("settingsButton");
+			
+			SettingsData newSettings = SettingsDialog.updateNewDialog(frame, data.getSettings());
+			data.setSettings(newSettings);
+		}
 	}
 }
 
 class PopUpDemo extends JPopupMenu {
-    JMenuItem anItem;
-    public PopUpDemo() {
-        anItem = new JMenuItem("Click Me!");
-        add(anItem);
-    }
+	JMenuItem anItem;
+	public PopUpDemo() {
+		anItem = new JMenuItem("Click Me!");
+		add(anItem);
+	}
 }
 
-class MainFrame extends JFrame 
+class MainFrame extends JFrame implements ChangeListener
 {
 	
 	private static final long serialVersionUID = 1L;
@@ -317,53 +405,29 @@ class MainFrame extends JFrame
 		
 		tabs = new JTabbedPane(JTabbedPane.TOP);
 		
-		tabs.addTab("vtbdevnew", null, DBForm.createNewForm(new SettingsData()).getPanel(), null);
+		SettingsData settings = new SettingsData();
+		settings.setName("vtbdevnew");
+		settings.setSqlServer("172.29.7.82");
+		settings.setMtmPort("20101");
+		settings.setProfileUser("1");
+		settings.setProfilePassword("xxx");
+		
+		tabs.addTab(settings.getName(), null, DBForm.createNewForm(settings, this).getPanel(), null);
 		tabs.setMnemonicAt(0, KeyEvent.VK_1);
 		
-		tabs.addTab("vtbcr810bqa", null, DBForm.createNewForm(new SettingsData()).getPanel(), null);
+		settings.setName("vtbCR810bqa");
+		settings.setSqlServer("172.29.7.82");
+		settings.setMtmPort("19275");
+		settings.setProfileUser("1");
+		settings.setProfilePassword("xxx");
+		
+		tabs.addTab(settings.getName(), null, DBForm.createNewForm(settings, this).getPanel(), null);
 		tabs.setMnemonicAt(1, KeyEvent.VK_2);
 		
 		this.tab_amount = 3;
 		tabs.addTab(" + ", null, new JPanel(), null);
 		
-		tabs.addChangeListener(new ChangeListener()
-							   {
-							   public void stateChanged(ChangeEvent evt)
-							   {
-							   System.out.println("mouse input");
-							   JTabbedPane tabbedPane = (JTabbedPane)evt.getSource();
-							   
-							   int prevIndex = active_tab;
-							   int tabIndex = tabbedPane.getSelectedIndex();
-							   System.out.println(tabIndex);
-							   System.out.println(active_tab);
-							   // Create a new Tab
-							   if (tabIndex == (tab_amount - 1))
-							   {
-							   System.out.println("new tab");
-							   SettingsData settings = openSettingsDialog();
-							   
-							   if (settings.name == null || settings.name.isEmpty()) {
-							   tabbedPane.setSelectedIndex(active_tab);
-							   System.out.println("no shit");
-							   return;
-							   }
-							   
-							   tabbedPane.remove(tabbedPane.getTabCount() - 1);
-							   tab_amount++ ;
-							   
-							   tabbedPane.addTab(settings.name, null, DBForm.createNewForm(settings).getPanel(), "new env");
-							   tabbedPane.addTab(" + ", null, new JPanel(), null);
-							   tabbedPane.setSelectedIndex(tabs.getTabCount() - 2);
-							   System.out.println("hello");
-							   }
-							   else 
-							   {
-							   System.out.println("hi");
-							   active_tab = tabIndex;
-							   }
-							   }
-							   });
+		tabs.addChangeListener(this);
 		
 		tabs.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
 		
@@ -378,17 +442,54 @@ class MainFrame extends JFrame
 		this.setVisible(true);
 	}
 	
+	public void stateChanged(ChangeEvent event) 
+	{
+		JTabbedPane tabbedPane = (JTabbedPane)event.getSource();
+		
+		int prevIndex = active_tab;
+		int tabIndex = tabbedPane.getSelectedIndex();
+		System.out.println(tabIndex);
+		System.out.println(active_tab);
+		// Create a new Tab
+		if (tabIndex == (tab_amount - 1))
+		{
+			System.out.println("new tab");
+			SettingsData settings = openSettingsDialog();
+			
+			if (settings.name == null || settings.name.isEmpty()) {
+				tabbedPane.setSelectedIndex(active_tab);
+				System.out.println("no shit");
+				return;
+			}
+			
+			tabbedPane.remove(tabbedPane.getTabCount() - 1);
+			tab_amount++ ;
+			
+			tabbedPane.addTab(settings.name, null, DBForm.createNewForm(settings, this).getPanel(), "new env");
+			tabbedPane.addTab(" + ", null, new JPanel(), null);
+			tabbedPane.setSelectedIndex(tabs.getTabCount() - 2);
+			System.out.println("hello");
+		}
+		else 
+		{
+			System.out.println("hi");
+			active_tab = tabIndex;
+		}
+	}
+	
 	public SettingsData openSettingsDialog()
 	{
-		SettingsData result = SettingsDialog.createDialog(this);
+		SettingsData result = SettingsDialog.createNewDialog(this);
 		return (result);
 	}
+	
+	
 	
 	// @Override
 	// public void mouseClicked(MouseEvent e)
 	// {
 	// 	PopUpDemo menu = new PopUpDemo();
-    //     menu.show(e.getComponent(), e.getX(), e.getY());
+	//     menu.show(e.getComponent(), e.getX(), e.getY());
 	
 	// 	System.out.println("hello");
 	
