@@ -286,31 +286,90 @@ class EnvironmentData
 	}
 }
 
+class Table
+{
+    JPanel panel;
+    DefaultTableModel model;
+    JTable table;
+    JScrollPane scrollPane;
+    
+    Table(String firstColumnName, String secondColumnName)
+    {
+        panel = new JPanel(new BorderLayout());
+        panel.setBorder(BorderFactory.createEtchedBorder());
+        
+        model = new DefaultTableModel();
+        model.addColumn(firstColumnName);
+        model.addColumn(secondColumnName);
+        
+        table = new JTable(model);
+        table.setPreferredScrollableViewportSize(table.getPreferredSize());
+		table.setFillsViewportHeight(true);
+		table.setFont(new Font("Courier New", Font.PLAIN, 14));
+		table.setShowVerticalLines(true);
+        
+        scrollPane = new JScrollPane(table);
+		
+		panel.add(scrollPane, BorderLayout.CENTER);
+    }
+    
+    public void fillTable(String data1[], String data2[])
+    {
+        model.setRowCount(0);
+        
+        for(int i = 0; i < data1.length; ++i)
+        {
+            String row[] = new String[2];
+            row[0] = data1[i];
+            row[1] = data2[i];
+            
+            model.addRow(row);
+        }
+        
+        table.setModel(model);
+        model.fireTableDataChanged();
+    }
+    
+    public JPanel getPanel()
+    {
+        return panel;
+    }
+}
+
 class DBForm implements ActionListener
 {
 	JFrame frame;
 	EnvironmentData data;
+    
 	JPanel panel = new JPanel(new GridBagLayout());
-	
+    Table tableList;
+    Table tableInfo;
+    Table fieldList;
+    Table fieldInfo;
+    
 	JButton refreshAllButton;
 	JButton settingsButton;
 	JButton refreshTableButton;
-	
+    
 	DBForm(SettingsData settings, JFrame frame)
 	{
 		this.frame = frame;
+        
 		data = new EnvironmentData(settings);
-		
-		JPanel tableList = createNewTable("Table Name", "Description");
-		JPanel tableInfo = createNewTable("Properties", "Value");
-		JPanel fieldList = createNewTable("Field Name", "Description");
-		JPanel fieldInfo = createNewTable("Properties", "Value");
-		
-		refreshAllButton = new JButton("Refresh");
+        
+		tableList = new Table("Table Name", "Description");
+        tableInfo = new Table("Properties", "Value");
+        fieldList = new Table("Field Name", "Description");
+        fieldInfo = new Table("Properties", "Value");
+        
+        refreshAllButton = new JButton("Update");
 		refreshAllButton.addActionListener(this);
 		
 		settingsButton = new JButton("Settings");
 		settingsButton.addActionListener(this);
+        
+        refreshTableButton = new JButton("Update");
+		refreshTableButton.addActionListener(this);
 		
 		JTextField tableSearch = new JTextField();
 		this.panel.add(tableSearch,  new GridBagConstraints(0, 0, 1, 1, 1.0, 0.01, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(2, 2, 2, 2), 100, 0));
@@ -320,20 +379,26 @@ class DBForm implements ActionListener
 		JTextField fieldSearch = new JTextField();
 		this.panel.add(fieldSearch,  new GridBagConstraints(3, 0, 1, 1, 1.0, 0.01, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(2, 2, 2, 2), 100, 0));
 		this.panel.add(new JLabel(""),  new GridBagConstraints(5, 0, 1, 1, 1.0, 0.01, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(2, 2, 2, 140), 0, 0));
-		this.panel.add(new JButton("Refresh"),  new GridBagConstraints(5, 0, 1, 1, 1.0, 0.01, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(2, 2, 2, 2), 0, 0));
+		this.panel.add(refreshTableButton,  new GridBagConstraints(5, 0, 1, 1, 1.0, 0.01, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(2, 2, 2, 2), 0, 0));
 		
-		this.panel.add(tableList,  new GridBagConstraints(0, 1, 3, 1, 1.0, 0.7, GridBagConstraints.WEST, GridBagConstraints.BOTH, new Insets(2, 2, 2, 2), 0, 0));
-		this.panel.add(tableInfo,  new GridBagConstraints(0, 2, 3, 1, 1.0, 0.35, GridBagConstraints.WEST, GridBagConstraints.BOTH, new Insets(2, 2, 2, 2), 0, 0));
-		this.panel.add(fieldList,  new GridBagConstraints(3, 1, 3, 1, 1.0, 0.7, GridBagConstraints.WEST, GridBagConstraints.BOTH, new Insets(2, 2, 2, 2), 0, 0));
-		this.panel.add(fieldInfo,  new GridBagConstraints(3, 2, 3, 1, 1.0, 0.35, GridBagConstraints.WEST, GridBagConstraints.BOTH, new Insets(2, 2, 2, 2), 0, 0));
+		this.panel.add(tableList.getPanel(),  new GridBagConstraints(0, 1, 3, 1, 1.0, 0.7, GridBagConstraints.WEST, GridBagConstraints.BOTH, new Insets(2, 2, 2, 2), 0, 0));
+		this.panel.add(tableInfo.getPanel(),  new GridBagConstraints(0, 2, 3, 1, 1.0, 0.35, GridBagConstraints.WEST, GridBagConstraints.BOTH, new Insets(2, 2, 2, 2), 0, 0));
+		this.panel.add(fieldList.getPanel(),  new GridBagConstraints(3, 1, 3, 1, 1.0, 0.7, GridBagConstraints.WEST, GridBagConstraints.BOTH, new Insets(2, 2, 2, 2), 0, 0));
+		this.panel.add(fieldInfo.getPanel(),  new GridBagConstraints(3, 2, 3, 1, 1.0, 0.35, GridBagConstraints.WEST, GridBagConstraints.BOTH, new Insets(2, 2, 2, 2), 0, 0));
 		
 		this.panel.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));
+        
 	}
+    
+    DBForm(SettingsData settings, JFrame frame, String data1[], String data2[])
+    {
+        this(settings, frame);
+        tableList.fillTable(data1, data2);
+    }
 	
 	public JPanel createNewTable(String firstName, String secondName)
 	{
 		JPanel panel = new JPanel(new BorderLayout());
-		panel.setBorder(BorderFactory.createEtchedBorder());
 		panel.setBorder(BorderFactory.createEtchedBorder());
 		
 		DefaultTableModel tableModel = new DefaultTableModel();
@@ -411,8 +476,13 @@ class MainFrame extends JFrame implements ChangeListener
 		settings.setMtmPort("20101");
 		settings.setProfileUser("1");
 		settings.setProfilePassword("xxx");
+        
+        String data1[] = {"table1", "table2", "table3"};
+        String data2[] = {"desc1", "desc2", "desc3"};
+        
+        DBForm form = new DBForm(settings, this, data1, data2);
 		
-		tabs.addTab(settings.getName(), null, DBForm.createNewForm(settings, this).getPanel(), null);
+		tabs.addTab(settings.getName(), null, form.getPanel(), null);
 		tabs.setMnemonicAt(0, KeyEvent.VK_1);
 		
 		settings.setName("vtbCR810bqa");
@@ -448,8 +518,7 @@ class MainFrame extends JFrame implements ChangeListener
 		
 		int prevIndex = active_tab;
 		int tabIndex = tabbedPane.getSelectedIndex();
-		System.out.println(tabIndex);
-		System.out.println(active_tab);
+		
 		// Create a new Tab
 		if (tabIndex == (tab_amount - 1))
 		{
@@ -482,38 +551,6 @@ class MainFrame extends JFrame implements ChangeListener
 		SettingsData result = SettingsDialog.createNewDialog(this);
 		return (result);
 	}
-	
-	
-	
-	// @Override
-	// public void mouseClicked(MouseEvent e)
-	// {
-	// 	PopUpDemo menu = new PopUpDemo();
-	//     menu.show(e.getComponent(), e.getX(), e.getY());
-	
-	// 	System.out.println("hello");
-	
-	// 	JTabbedPane tabbedPane = (JTabbedPane)e.getSource();
-	
-	// 	if (tabbedPane.getSelectedIndex() == (tab_amount - 1))
-	// 	{
-	// 		System.out.println("new tab");
-	// 		SettingsData settings = openSettingsDialog();
-	
-	// 		if (settings.name == null || settings.name.isEmpty()) {
-	// 			tabbedPane.setSelectedIndex(tabs.getTabCount() - 2);
-	// 			return;
-	// 		}
-	
-	// 		tabbedPane.remove(tabbedPane.getTabCount() - 1);
-	// 		tab_amount++ ;
-	
-	// 		tabbedPane.addTab(settings.name, null, DBForm.createNewForm(settings).getPanel(), "new env");
-	// 		tabbedPane.addTab(" + ", null, new JPanel(), null);
-	// 		tabbedPane.setSelectedIndex(tabs.getTabCount() - 2);
-	// 	}
-	
-	// }
 }
 
 public class Main
