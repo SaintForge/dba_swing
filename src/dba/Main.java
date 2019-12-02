@@ -293,14 +293,13 @@ class Table
     JTable table;
     JScrollPane scrollPane;
     
-    Table(String firstColumnName, String secondColumnName)
+    Table(String columnName)
     {
         panel = new JPanel(new BorderLayout());
         panel.setBorder(BorderFactory.createEtchedBorder());
         
         model = new DefaultTableModel();
-        model.addColumn(firstColumnName);
-        model.addColumn(secondColumnName);
+        model.addColumn(columnName);
         
         table = new JTable(model);
         table.setPreferredScrollableViewportSize(table.getPreferredSize());
@@ -313,7 +312,43 @@ class Table
 		panel.add(scrollPane, BorderLayout.CENTER);
     }
     
-    public void fillTable(String data1[], String data2[])
+    Table(String firstColumnName, String secondColumnName)
+    {
+        panel = new JPanel(new BorderLayout());
+        panel.setBorder(BorderFactory.createEtchedBorder());
+        
+        model = new DefaultTableModel();
+        model.addColumn(firstColumnName);
+        model.addColumn(secondColumnName);
+        
+        table = new JTable(model);
+        //table.setPreferredScrollableViewportSize(table.getPreferredSize());
+		table.setFillsViewportHeight(true);
+		table.setFont(new Font("Courier New", Font.PLAIN, 14));
+		table.setShowVerticalLines(true);
+        
+        scrollPane = new JScrollPane(table);
+		
+		panel.add(scrollPane, BorderLayout.CENTER);
+    }
+    
+    public void populateTable(String data[])
+    {
+        model.setRowCount(0);
+        
+        for(int i = 0; i < data.length; ++i)
+        {
+            String row[] = new String[2];
+            row[0] = data[i];
+            row[1] = "";
+            model.addRow(row);
+        }
+        
+        table.setModel(model);
+        model.fireTableDataChanged();
+    }
+    
+    public void populateTable(String data1[], String data2[])
     {
         model.setRowCount(0);
         
@@ -334,6 +369,74 @@ class Table
     {
         return panel;
     }
+    
+    public JScrollPane getScrollPane()
+    {
+        return scrollPane;
+    }
+}
+
+class SplitPane
+{
+    Table selectTable;
+    Table valueTable;
+    
+    JSplitPane splitPane;
+    
+    SplitPane() 
+    {
+        String exList[] = {"dog", "cat", "mouse"};
+        selectTable = new Table("Index Name");
+        selectTable.populateTable(exList);
+        
+        //list.addListSelectionListener(this);
+        
+        valueTable = new Table("Property", "Value");
+        
+        splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, selectTable.getScrollPane(), valueTable.getScrollPane());
+        splitPane.setDividerLocation(150);
+    }
+    
+    public JSplitPane getSplitPane()
+    {
+        return splitPane;
+    }
+}
+
+class TabbedTable
+{
+    JTabbedPane tabs;
+    int activeTab = 0;
+    
+    JPanel panel;
+    Table propsTable;
+    SplitPane indexTable;
+    
+    TabbedTable()
+    {
+        panel = new JPanel(new GridBagLayout());
+        
+        tabs = new JTabbedPane(JTabbedPane.TOP);
+        
+        propsTable = new Table("Properties", "Description");
+        //indexTable = new Table("Index Name", "Property");
+        indexTable = new SplitPane();
+        
+        tabs.addTab("Table Properties", null, propsTable.getPanel(), null);
+        //tabs.addTab("Index", null, indexTable.getPanel(), null);
+        tabs.addTab("Index", null, indexTable.getSplitPane(), null);
+        
+        //tabs.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
+        
+        //panel.add(propsTable.getPanel());
+        this.panel.add(tabs,  new GridBagConstraints(0, 0, 1, 1, 1.0, 0.7, GridBagConstraints.WEST, GridBagConstraints.BOTH, new Insets(2, 2, 2, 2), 0, 0));
+        panel.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));
+    }
+    
+    public JPanel getPanel()
+    {
+        return panel;
+    }
 }
 
 class DBForm implements ActionListener
@@ -343,7 +446,8 @@ class DBForm implements ActionListener
     
 	JPanel panel = new JPanel(new GridBagLayout());
     Table tableList;
-    Table tableInfo;
+    //Table tableInfo;
+    TabbedTable tableInfo;
     Table fieldList;
     Table fieldInfo;
     
@@ -358,7 +462,7 @@ class DBForm implements ActionListener
 		data = new EnvironmentData(settings);
         
 		tableList = new Table("Table Name", "Description");
-        tableInfo = new Table("Properties", "Value");
+        tableInfo = new TabbedTable();
         fieldList = new Table("Field Name", "Description");
         fieldInfo = new Table("Properties", "Value");
         
@@ -382,7 +486,8 @@ class DBForm implements ActionListener
 		this.panel.add(refreshTableButton,  new GridBagConstraints(5, 0, 1, 1, 1.0, 0.01, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(2, 2, 2, 2), 0, 0));
 		
 		this.panel.add(tableList.getPanel(),  new GridBagConstraints(0, 1, 3, 1, 1.0, 0.7, GridBagConstraints.WEST, GridBagConstraints.BOTH, new Insets(2, 2, 2, 2), 0, 0));
-		this.panel.add(tableInfo.getPanel(),  new GridBagConstraints(0, 2, 3, 1, 1.0, 0.35, GridBagConstraints.WEST, GridBagConstraints.BOTH, new Insets(2, 2, 2, 2), 0, 0));
+        
+        this.panel.add(tableInfo.getPanel(),  new GridBagConstraints(0, 2, 3, 1, 1.0, 0.35, GridBagConstraints.WEST, GridBagConstraints.BOTH, new Insets(2, 2, 2, 2), 0, 0));
 		this.panel.add(fieldList.getPanel(),  new GridBagConstraints(3, 1, 3, 1, 1.0, 0.7, GridBagConstraints.WEST, GridBagConstraints.BOTH, new Insets(2, 2, 2, 2), 0, 0));
 		this.panel.add(fieldInfo.getPanel(),  new GridBagConstraints(3, 2, 3, 1, 1.0, 0.35, GridBagConstraints.WEST, GridBagConstraints.BOTH, new Insets(2, 2, 2, 2), 0, 0));
 		
@@ -393,7 +498,7 @@ class DBForm implements ActionListener
     DBForm(SettingsData settings, JFrame frame, String data1[], String data2[])
     {
         this(settings, frame);
-        tableList.fillTable(data1, data2);
+        tableList.populateTable(data1, data2);
     }
 	
 	public JPanel createNewTable(String firstName, String secondName)
@@ -456,7 +561,6 @@ class PopUpDemo extends JPopupMenu {
 
 class MainFrame extends JFrame implements ChangeListener
 {
-	
 	private static final long serialVersionUID = 1L;
 	
 	int active_tab = 0;
