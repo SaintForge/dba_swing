@@ -98,8 +98,9 @@ class SettingsDialog extends JDialog
 {
 	private static final long serialVersionUID = 1L;
 	
-	JButton okButton = new JButton("Create");
+	JButton okButton = new JButton("OK");
 	JButton cancelButton = new JButton("Cancel"); 
+    JButton deleteButton = new JButton("Delete");
 	SettingsData settings = new SettingsData();
 	
 	JPanel panel;
@@ -127,10 +128,10 @@ class SettingsDialog extends JDialog
 		this.prevComponent = comp;
 	}
 	
-	SettingsDialog(Frame owner, String title)
+	SettingsDialog(Frame owner, String title, Boolean isUpdate)
 	{
 		super(owner, title, true);
-		
+        
 		this.springLayout = new SpringLayout();
 		this.panel = new JPanel(this.springLayout);
 		this.prevComponent = this.panel;
@@ -159,6 +160,13 @@ class SettingsDialog extends JDialog
 										}
 										}
 										});
+        
+        if (isUpdate)
+        {
+            panel.add(deleteButton);
+            springLayout.putConstraint("South", this.deleteButton, -10, "South", this.panel);
+            springLayout.putConstraint("East", this.deleteButton, -10, "West", this.okButton);
+        }
 		
 		this.panel.add(this.okButton);
 		this.springLayout.putConstraint("South", this.okButton, -10, "South", this.panel);
@@ -189,7 +197,7 @@ class SettingsDialog extends JDialog
 	
 	SettingsDialog(Frame owner, String title, SettingsData settings)
 	{
-		this(owner,title);
+		this(owner,title,true);
 		
 		this.settings = settings;
 		
@@ -204,7 +212,7 @@ class SettingsDialog extends JDialog
 	
 	public static SettingsData createNewDialog(JFrame parent)
 	{
-		SettingsDialog dialog = new SettingsDialog(parent, "New Environment");
+		SettingsDialog dialog = new SettingsDialog(parent, "New Environment", false);
 		
 		dialog.pack();
 		dialog.setVisible(true);
@@ -286,17 +294,16 @@ class EnvironmentData
 	}
 }
 
-class Table
+class Table extends JPanel
 {
-    JPanel panel;
     DefaultTableModel model;
     JTable table;
     JScrollPane scrollPane;
     
     Table(String columnName)
     {
-        panel = new JPanel(new BorderLayout());
-        panel.setBorder(BorderFactory.createEtchedBorder());
+        super(new BorderLayout());
+        setBorder(BorderFactory.createEtchedBorder());
         
         model = new DefaultTableModel();
         model.addColumn(columnName);
@@ -309,13 +316,13 @@ class Table
         
         scrollPane = new JScrollPane(table);
 		
-		panel.add(scrollPane, BorderLayout.CENTER);
+		add(scrollPane, BorderLayout.CENTER);
     }
     
     Table(String firstColumnName, String secondColumnName)
     {
-        panel = new JPanel(new BorderLayout());
-        panel.setBorder(BorderFactory.createEtchedBorder());
+        super(new BorderLayout());
+        setBorder(BorderFactory.createEtchedBorder());
         
         model = new DefaultTableModel();
         model.addColumn(firstColumnName);
@@ -329,7 +336,7 @@ class Table
         
         scrollPane = new JScrollPane(table);
 		
-		panel.add(scrollPane, BorderLayout.CENTER);
+		add(scrollPane, BorderLayout.CENTER);
     }
     
     public void populateTable(String data[])
@@ -365,77 +372,122 @@ class Table
         model.fireTableDataChanged();
     }
     
-    public JPanel getPanel()
-    {
-        return panel;
-    }
-    
     public JScrollPane getScrollPane()
     {
         return scrollPane;
     }
+    
+    public JTable getTable()
+    {
+        return table;
+    }
 }
 
-class SplitPane
+class SplitPane extends JPanel implements MouseListener
 {
     Table selectTable;
     Table valueTable;
     
     JSplitPane splitPane;
     
+    String exList[] = {"dog", "cat", "mouse"};
+    
     SplitPane() 
     {
-        String exList[] = {"dog", "cat", "mouse"};
-        selectTable = new Table("Index Name");
-        selectTable.populateTable(exList);
+        super(new BorderLayout());
         
-        //list.addListSelectionListener(this);
+        selectTable = new Table("Index Name");
+        selectTable.getTable().addMouseListener(this);
         
         valueTable = new Table("Property", "Value");
+        valueTable.getTable().addMouseListener(this);
         
         splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, selectTable.getScrollPane(), valueTable.getScrollPane());
         splitPane.setDividerLocation(150);
+        
+        selectTable.populateTable(exList);
+        add(splitPane, BorderLayout.CENTER);
     }
     
-    public JSplitPane getSplitPane()
+    public void mouseClicked(MouseEvent event) 
     {
-        return splitPane;
+        if (event.getSource() == selectTable.getTable()) 
+        {
+            int rowIndex = selectTable.getTable().getSelectedRow();
+            if (rowIndex == 0) 
+            {
+                String data1[] = {"name", "size", "color"};
+                String data2[] = {"Bucha", "big", "brown"};
+                valueTable.populateTable(data1, data2);
+            }
+            else if (rowIndex == 1)
+            {
+                String data1[] = {"name", "size", "color"};
+                String data2[] = {"Bonya", "middle", "black"};
+                valueTable.populateTable(data1, data2);
+            }
+            else if (rowIndex == 2)
+            {
+                String data1[] = {"name", "size", "color"};
+                String data2[] = {"Jerry", "small", "grey"};
+                valueTable.populateTable(data1, data2);
+            }
+        }
+        else if (event.getSource() == valueTable.getTable()) 
+        {
+            System.out.println("table2");
+        }
+    }
+    
+    public void mouseExited(MouseEvent event) {}
+	public void mouseEntered(MouseEvent event) {}
+	public void mousePressed(MouseEvent event) {}
+	public void mouseReleased(MouseEvent event) {} 
+}
+
+class TextArea extends JPanel
+{
+    JTextArea textArea;
+    JScrollPane scrollPane;
+    
+    TextArea()
+    {
+        super(new BorderLayout());
+        
+        textArea = new JTextArea();
+        textArea.setEditable(false);
+        populateData("This is data.");
+        
+        scrollPane = new JScrollPane(textArea);
+        
+        add(scrollPane, BorderLayout.CENTER);
+    }
+    
+    public void populateData(String data)
+    {
+        textArea.setText(data);
     }
 }
 
-class TabbedTable
+class TabbedTable extends JPanel
 {
     JTabbedPane tabs;
-    int activeTab = 0;
-    
-    JPanel panel;
-    Table propsTable;
-    SplitPane indexTable;
     
     TabbedTable()
     {
-        panel = new JPanel(new GridBagLayout());
+        super(new BorderLayout());
         
         tabs = new JTabbedPane(JTabbedPane.TOP);
         
-        propsTable = new Table("Properties", "Description");
-        //indexTable = new Table("Index Name", "Property");
-        indexTable = new SplitPane();
+        tabs.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
         
-        tabs.addTab("Table Properties", null, propsTable.getPanel(), null);
-        //tabs.addTab("Index", null, indexTable.getPanel(), null);
-        tabs.addTab("Index", null, indexTable.getSplitPane(), null);
-        
-        //tabs.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
-        
-        //panel.add(propsTable.getPanel());
-        this.panel.add(tabs,  new GridBagConstraints(0, 0, 1, 1, 1.0, 0.7, GridBagConstraints.WEST, GridBagConstraints.BOTH, new Insets(2, 2, 2, 2), 0, 0));
-        panel.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));
+        add(tabs, BorderLayout.CENTER);
+        setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));
     }
     
-    public JPanel getPanel()
+    public void addTab(String name, JPanel tab) 
     {
-        return panel;
+        tabs.addTab(name, null, tab, null);
     }
 }
 
@@ -446,10 +498,10 @@ class DBForm implements ActionListener
     
 	JPanel panel = new JPanel(new GridBagLayout());
     Table tableList;
-    //Table tableInfo;
     TabbedTable tableInfo;
     Table fieldList;
-    Table fieldInfo;
+    //Table fieldInfo;
+    TabbedTable fieldInfo;
     
 	JButton refreshAllButton;
 	JButton settingsButton;
@@ -463,16 +515,22 @@ class DBForm implements ActionListener
         
 		tableList = new Table("Table Name", "Description");
         tableInfo = new TabbedTable();
-        fieldList = new Table("Field Name", "Description");
-        fieldInfo = new Table("Properties", "Value");
+        tableInfo.addTab("Table Properties", new Table("Properties", "Description"));
+        tableInfo.addTab("Index", new SplitPane());
+        tableInfo.addTab("Table Documentation", new TextArea());
         
-        refreshAllButton = new JButton("Update");
+        fieldList = new Table("Field Name", "Description");
+        fieldInfo = new TabbedTable();
+        fieldInfo.addTab("Column Properties", new Table("Properties", "Description"));
+        fieldInfo.addTab("Column Documentation", new TextArea());
+        
+        refreshAllButton = new JButton("Update All");
 		refreshAllButton.addActionListener(this);
 		
 		settingsButton = new JButton("Settings");
 		settingsButton.addActionListener(this);
         
-        refreshTableButton = new JButton("Update");
+        refreshTableButton = new JButton("Update Table");
 		refreshTableButton.addActionListener(this);
 		
 		JTextField tableSearch = new JTextField();
@@ -483,13 +541,13 @@ class DBForm implements ActionListener
 		JTextField fieldSearch = new JTextField();
 		this.panel.add(fieldSearch,  new GridBagConstraints(3, 0, 1, 1, 1.0, 0.01, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(2, 2, 2, 2), 100, 0));
 		this.panel.add(new JLabel(""),  new GridBagConstraints(5, 0, 1, 1, 1.0, 0.01, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(2, 2, 2, 140), 0, 0));
-		this.panel.add(refreshTableButton,  new GridBagConstraints(5, 0, 1, 1, 1.0, 0.01, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(2, 2, 2, 2), 0, 0));
+		this.panel.add(refreshTableButton,  new GridBagConstraints(5, 0, 2, 1, 1.0, 0.01, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(2, 2, 2, 2), 0, 0));
 		
-		this.panel.add(tableList.getPanel(),  new GridBagConstraints(0, 1, 3, 1, 1.0, 0.7, GridBagConstraints.WEST, GridBagConstraints.BOTH, new Insets(2, 2, 2, 2), 0, 0));
+		this.panel.add(tableList,  new GridBagConstraints(0, 1, 3, 1, 1.0, 0.7, GridBagConstraints.WEST, GridBagConstraints.BOTH, new Insets(2, 2, 2, 2), 0, 0));
         
-        this.panel.add(tableInfo.getPanel(),  new GridBagConstraints(0, 2, 3, 1, 1.0, 0.35, GridBagConstraints.WEST, GridBagConstraints.BOTH, new Insets(2, 2, 2, 2), 0, 0));
-		this.panel.add(fieldList.getPanel(),  new GridBagConstraints(3, 1, 3, 1, 1.0, 0.7, GridBagConstraints.WEST, GridBagConstraints.BOTH, new Insets(2, 2, 2, 2), 0, 0));
-		this.panel.add(fieldInfo.getPanel(),  new GridBagConstraints(3, 2, 3, 1, 1.0, 0.35, GridBagConstraints.WEST, GridBagConstraints.BOTH, new Insets(2, 2, 2, 2), 0, 0));
+        this.panel.add(tableInfo, new GridBagConstraints(0, 2, 3, 1, 1.0, 0.4, GridBagConstraints.WEST, GridBagConstraints.BOTH, new Insets(2, 2, 2, 2), 0, 0));
+		this.panel.add(fieldList,  new GridBagConstraints(3, 1, 3, 1, 1.0, 0.7, GridBagConstraints.WEST, GridBagConstraints.BOTH, new Insets(2, 2, 2, 2), 0, 0));
+		this.panel.add(fieldInfo,  new GridBagConstraints(3, 2, 3, 1, 1.0, 0.4, GridBagConstraints.WEST, GridBagConstraints.BOTH, new Insets(2, 2, 2, 2), 0, 0));
 		
 		this.panel.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));
         
@@ -545,17 +603,10 @@ class DBForm implements ActionListener
 		{
 			System.out.println("settingsButton");
 			
+            // NOTE(Sierra): Look for backward event in order to tell MainFrame that we want to delete the whole tab
 			SettingsData newSettings = SettingsDialog.updateNewDialog(frame, data.getSettings());
 			data.setSettings(newSettings);
 		}
-	}
-}
-
-class PopUpDemo extends JPopupMenu {
-	JMenuItem anItem;
-	public PopUpDemo() {
-		anItem = new JMenuItem("Click Me!");
-		add(anItem);
 	}
 }
 
@@ -631,7 +682,6 @@ class MainFrame extends JFrame implements ChangeListener
 			
 			if (settings.name == null || settings.name.isEmpty()) {
 				tabbedPane.setSelectedIndex(active_tab);
-				System.out.println("no shit");
 				return;
 			}
 			
@@ -645,7 +695,6 @@ class MainFrame extends JFrame implements ChangeListener
 		}
 		else 
 		{
-			System.out.println("hi");
 			active_tab = tabIndex;
 		}
 	}
@@ -661,7 +710,7 @@ public class Main
 {
 	public static void run()
 	{
-		MainFrame main = new MainFrame();
+        MainFrame main = new MainFrame();
 	}
 	
 	public static void main(String[] args) 
