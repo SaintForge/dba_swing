@@ -596,6 +596,7 @@ class DBForm implements ActionListener
 	
 	public void actionPerformed(ActionEvent event) 
 	{
+        System.out.println("DBForm.actionPerformed");
 		if (event.getSource() == refreshAllButton) {
 			System.out.println("refreshAllButton");
 		}
@@ -615,8 +616,7 @@ class MainFrame extends JFrame implements ChangeListener
 	private static final long serialVersionUID = 1L;
 	
 	int active_tab = 0;
-	int tab_amount = 0;
-	JTabbedPane tabs;
+	final JTabbedPane tabs;
 	
 	MainFrame()
 	{
@@ -624,6 +624,7 @@ class MainFrame extends JFrame implements ChangeListener
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
 		tabs = new JTabbedPane(JTabbedPane.TOP);
+        tabs.setTabLayoutPolicy(JTabbedPane.WRAP_TAB_LAYOUT);
 		
 		SettingsData settings = new SettingsData();
 		settings.setName("vtbdevnew");
@@ -639,7 +640,10 @@ class MainFrame extends JFrame implements ChangeListener
 		
 		tabs.addTab(settings.getName(), null, form.getPanel(), null);
 		tabs.setMnemonicAt(0, KeyEvent.VK_1);
-		
+        
+        tabs.setTabComponentAt(0, new ButtonTabComponent(tabs));
+        
+        
 		settings.setName("vtbCR810bqa");
 		settings.setSqlServer("172.29.7.82");
 		settings.setMtmPort("19275");
@@ -648,8 +652,8 @@ class MainFrame extends JFrame implements ChangeListener
 		
 		tabs.addTab(settings.getName(), null, DBForm.createNewForm(settings, this).getPanel(), null);
 		tabs.setMnemonicAt(1, KeyEvent.VK_2);
+        tabs.setTabComponentAt(1, new ButtonTabComponent(tabs));
 		
-		this.tab_amount = 3;
 		tabs.addTab(" + ", null, new JPanel(), null);
 		
 		tabs.addChangeListener(this);
@@ -657,49 +661,59 @@ class MainFrame extends JFrame implements ChangeListener
 		tabs.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
 		
 		JPanel tab_panel = new JPanel(new GridLayout(1, 1));
-		tab_panel.add(tabs);
-		
-		this.getContentPane().add(tab_panel);
+        tab_panel.add(tabs);
+        
+        this.getContentPane().add(tab_panel);
 		
 		this.setPreferredSize(new Dimension(1200, 768));
 		this.pack();
 		this.setLocationRelativeTo(null);
 		this.setVisible(true);
+        
+        if (tabs.getTabCount() == 1) 
+        {
+            createNewTab(tabs);
+        }
 	}
+    
+    private void createNewTab(JTabbedPane pane)
+    {
+        System.out.println("MainFrame.createNewTab");
+        
+        SettingsData settings = openSettingsDialog();
+        
+        if (settings.name == null || settings.name.isEmpty()) {
+            if (pane.getTabCount() == 1) {
+                this.dispatchEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING));
+            }
+            
+            pane.setSelectedIndex(pane.getSelectedIndex()-1);
+            return;
+        }
+        
+        pane.addTab(settings.name, null, DBForm.createNewForm(settings, this).getPanel(), "new env");
+        
+        
+        pane.addTab(" + ", null, new JPanel(), null);
+        pane.setSelectedIndex(pane.getTabCount() - 2);
+        pane.remove(pane.getTabCount() - 3);
+        
+        pane.setTabComponentAt(pane.getSelectedIndex(), new ButtonTabComponent(pane));
+    }
 	
 	public void stateChanged(ChangeEvent event) 
 	{
+        System.out.println("MainFrame.stateChanged");
 		JTabbedPane tabbedPane = (JTabbedPane)event.getSource();
 		
-		int prevIndex = active_tab;
-		int tabIndex = tabbedPane.getSelectedIndex();
-		
 		// Create a new Tab
-		if (tabIndex == (tab_amount - 1))
+		if (tabbedPane.getSelectedIndex() == (tabbedPane.getTabCount() - 1))
 		{
-			System.out.println("new tab");
-			SettingsData settings = openSettingsDialog();
-			
-			if (settings.name == null || settings.name.isEmpty()) {
-				tabbedPane.setSelectedIndex(active_tab);
-				return;
-			}
-			
-			tabbedPane.remove(tabbedPane.getTabCount() - 1);
-			tab_amount++ ;
-			
-			tabbedPane.addTab(settings.name, null, DBForm.createNewForm(settings, this).getPanel(), "new env");
-			tabbedPane.addTab(" + ", null, new JPanel(), null);
-			tabbedPane.setSelectedIndex(tabs.getTabCount() - 2);
-			System.out.println("hello");
-		}
-		else 
-		{
-			active_tab = tabIndex;
-		}
-	}
-	
-	public SettingsData openSettingsDialog()
+            createNewTab(tabbedPane);
+        }
+    }
+    
+    public SettingsData openSettingsDialog()
 	{
 		SettingsData result = SettingsDialog.createNewDialog(this);
 		return (result);
