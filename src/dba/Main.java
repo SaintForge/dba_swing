@@ -45,6 +45,9 @@ import javax.swing.JPasswordField;
 import javax.swing.SpringLayout;
 import javax.swing.event.*;
 
+import javax.swing.table.TableModel;
+import javax.swing.table.TableRowSorter;
+
 import java.util.Date;
 import java.util.Vector;
 
@@ -372,6 +375,11 @@ class Table extends JPanel
         model.fireTableDataChanged();
     }
     
+    public void setRowSorter(TableRowSorter<TableModel> tableSorter)
+    {
+        table.setRowSorter(tableSorter);
+    }
+    
     public JScrollPane getScrollPane()
     {
         return scrollPane;
@@ -380,6 +388,11 @@ class Table extends JPanel
     public JTable getTable()
     {
         return table;
+    }
+    
+    public DefaultTableModel getModel()
+    {
+        return model;
     }
 }
 
@@ -491,12 +504,19 @@ class TabbedTable extends JPanel
     }
 }
 
-class DBForm implements ActionListener
+class DBForm implements ActionListener, DocumentListener
 {
 	JFrame frame;
 	EnvironmentData data;
     
 	JPanel panel = new JPanel(new GridBagLayout());
+    
+    JTextField tableSearch;
+    TableRowSorter<TableModel> tableSorter;
+    
+    JTextField fieldSearch;
+    TableRowSorter<TableModel> fieldSorter;
+    
     Table tableList;
     TabbedTable tableInfo;
     Table fieldList;
@@ -514,6 +534,7 @@ class DBForm implements ActionListener
 		data = new EnvironmentData(settings);
         
 		tableList = new Table("Table Name", "Description");
+        
         tableInfo = new TabbedTable();
         tableInfo.addTab("Table Properties", new Table("Properties", "Description"));
         tableInfo.addTab("Index", new SplitPane());
@@ -533,12 +554,22 @@ class DBForm implements ActionListener
         refreshTableButton = new JButton("Update Table");
 		refreshTableButton.addActionListener(this);
 		
-		JTextField tableSearch = new JTextField();
+		tableSearch = new JTextField();
+        tableSorter = new TableRowSorter<TableModel>(tableList.getModel());
+        tableSearch.getDocument().addDocumentListener(this);
+        tableList.setRowSorter(tableSorter);
+        
+        fieldSearch = new JTextField();
+        fieldSorter = new TableRowSorter<TableModel>(fieldList.getModel());
+        fieldSearch.getDocument().addDocumentListener(this);
+        fieldList.setRowSorter(fieldSorter);
+        
 		this.panel.add(tableSearch,  new GridBagConstraints(0, 0, 1, 1, 1.0, 0.01, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(2, 2, 2, 2), 100, 0));
 		this.panel.add(refreshAllButton,  new GridBagConstraints(2, 0, 1, 1, 1.0, 0.01, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(2, 2, 2, 80), 0, 0));
 		this.panel.add(settingsButton,  new GridBagConstraints(2, 0, 1, 1, 1.0, 0.01, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(2, 2, 2, 2), 0, 0));
 		
-		JTextField fieldSearch = new JTextField();
+		fieldSearch = new JTextField();
+        fieldSearch.getDocument().addDocumentListener(this);
 		this.panel.add(fieldSearch,  new GridBagConstraints(3, 0, 1, 1, 1.0, 0.01, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(2, 2, 2, 2), 100, 0));
 		this.panel.add(new JLabel(""),  new GridBagConstraints(5, 0, 1, 1, 1.0, 0.01, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(2, 2, 2, 140), 0, 0));
 		this.panel.add(refreshTableButton,  new GridBagConstraints(5, 0, 2, 1, 1.0, 0.01, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(2, 2, 2, 2), 0, 0));
@@ -609,72 +640,116 @@ class DBForm implements ActionListener
 			data.setSettings(newSettings);
 		}
 	}
+    
+    
+    @Override
+        public void insertUpdate(DocumentEvent event)
+    {
+        JTextField tmpSearch;
+        TableRowSorter tmpSorter;
+        if (event.getDocument() == tableSearch.getDocument()) 
+        {
+            String text = tableSearch.getText();
+            if (text.trim().length() == 0)
+            {
+                tableSorter.setRowFilter(null);
+            }
+            else
+            {
+                tableSorter.setRowFilter(RowFilter.regexFilter("(?i)" + text));
+            } 
+        }
+        else if (event.getDocument() == fieldSearch.getDocument())
+        {
+            String text = fieldSearch.getText();
+            if (text.trim().length() == 0)
+            {
+                fieldSorter.setRowFilter(null);
+            }
+            else
+            {
+                fieldSorter.setRowFilter(RowFilter.regexFilter("(?i)" + text));
+            } 
+        }
+    }
+    
+    @Override
+        public void removeUpdate(DocumentEvent event)
+    {
+        insertUpdate(event);
+    }
+    
+    @Override
+        public void changedUpdate(DocumentEvent event)
+    {
+        
+    }
 }
 
 class MainFrame extends JFrame implements ChangeListener
 {
-	private static final long serialVersionUID = 1L;
-	
-	int active_tab = 0;
-	final JTabbedPane tabs;
-	
-	MainFrame()
-	{
-		this.setSize(1200, 600);
-		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		
-		tabs = new JTabbedPane(JTabbedPane.TOP);
+    private static final long serialVersionUID = 1L;
+    
+    int active_tab = 0;
+    final JTabbedPane tabs;
+    
+    MainFrame()
+    {
+        this.setSize(1200, 600);
+        this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        
+        tabs = new JTabbedPane(JTabbedPane.TOP);
         tabs.setTabLayoutPolicy(JTabbedPane.WRAP_TAB_LAYOUT);
-		
-		SettingsData settings = new SettingsData();
-		settings.setName("vtbdevnew");
-		settings.setSqlServer("172.29.7.82");
-		settings.setMtmPort("20101");
-		settings.setProfileUser("1");
-		settings.setProfilePassword("xxx");
+        
+        SettingsData settings = new SettingsData();
+        settings.setName("vtbdevnew");
+        settings.setSqlServer("172.29.7.82");
+        settings.setMtmPort("20101");
+        settings.setProfileUser("1");
+        settings.setProfilePassword("xxx");
         
         String data1[] = {"table1", "table2", "table3"};
         String data2[] = {"desc1", "desc2", "desc3"};
         
         DBForm form = new DBForm(settings, this, data1, data2);
-		
-		tabs.addTab(settings.getName(), null, form.getPanel(), null);
-		tabs.setMnemonicAt(0, KeyEvent.VK_1);
+        
+        tabs.addTab(settings.getName(), null, form.getPanel(), null);
+        tabs.setMnemonicAt(0, KeyEvent.VK_1);
         
         tabs.setTabComponentAt(0, new ButtonTabComponent(tabs));
         
         
-		settings.setName("vtbCR810bqa");
-		settings.setSqlServer("172.29.7.82");
-		settings.setMtmPort("19275");
-		settings.setProfileUser("1");
-		settings.setProfilePassword("xxx");
-		
-		tabs.addTab(settings.getName(), null, DBForm.createNewForm(settings, this).getPanel(), null);
-		tabs.setMnemonicAt(1, KeyEvent.VK_2);
+        settings.setName("vtbCR810bqa");
+        settings.setSqlServer("172.29.7.82");
+        settings.setMtmPort("19275");
+        settings.setProfileUser("1");
+        settings.setProfilePassword("xxx");
+        
+        tabs.addTab(settings.getName(), null, DBForm.createNewForm(settings, this).getPanel(), null);
+        tabs.setMnemonicAt(1, KeyEvent.VK_2);
         tabs.setTabComponentAt(1, new ButtonTabComponent(tabs));
-		
-		tabs.addTab(" + ", null, new JPanel(), null);
-		
-		tabs.addChangeListener(this);
-		
-		tabs.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
-		
-		JPanel tab_panel = new JPanel(new GridLayout(1, 1));
+        
+        tabs.addTab(" + ", null, new JPanel(), null);
+        
+        tabs.addChangeListener(this);
+        
+        tabs.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
+        
+        JPanel tab_panel = new JPanel(new GridLayout(1, 1));
         tab_panel.add(tabs);
         
         this.getContentPane().add(tab_panel);
-		
-		this.setPreferredSize(new Dimension(1200, 768));
-		this.pack();
-		this.setLocationRelativeTo(null);
-		this.setVisible(true);
+        
+        this.setPreferredSize(new Dimension(1200, 768));
+        this.pack();
+        this.setLocationRelativeTo(null);
+        this.setVisible(true);
         
         if (tabs.getTabCount() == 1) 
         {
             createNewTab(tabs);
         }
-	}
+    }
     
     private void createNewTab(JTabbedPane pane)
     {
@@ -700,44 +775,45 @@ class MainFrame extends JFrame implements ChangeListener
         
         pane.setTabComponentAt(pane.getSelectedIndex(), new ButtonTabComponent(pane));
     }
-	
-	public void stateChanged(ChangeEvent event) 
-	{
+    
+    public void stateChanged(ChangeEvent event) 
+    {
         System.out.println("MainFrame.stateChanged");
-		JTabbedPane tabbedPane = (JTabbedPane)event.getSource();
-		
-		// Create a new Tab
-		if (tabbedPane.getSelectedIndex() == (tabbedPane.getTabCount() - 1))
-		{
+        JTabbedPane tabbedPane = (JTabbedPane)event.getSource();
+        
+        // Create a new Tab
+        if (tabbedPane.getSelectedIndex() == (tabbedPane.getTabCount() - 1))
+        {
             createNewTab(tabbedPane);
         }
     }
     
     public SettingsData openSettingsDialog()
-	{
-		SettingsData result = SettingsDialog.createNewDialog(this);
-		return (result);
-	}
+    {
+        SettingsData result = SettingsDialog.createNewDialog(this);
+        return (result);
+    }
+    
 }
 
 public class Main
 {
-	public static void run()
-	{
+    public static void run()
+    {
         MainFrame main = new MainFrame();
-	}
-	
-	public static void main(String[] args) 
-	{
-		try
-		{
-			UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
-		}  
-		catch (UnsupportedLookAndFeelException e) {}
-		catch (ClassNotFoundException e) {}
-		catch (InstantiationException e) {}
-		catch (IllegalAccessException e) {}
-		
-		run();
-	}
+    }
+    
+    public static void main(String[] args) 
+    {
+        try
+        {
+            UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
+        }  
+        catch (UnsupportedLookAndFeelException e) {}
+        catch (ClassNotFoundException e) {}
+        catch (InstantiationException e) {}
+        catch (IllegalAccessException e) {}
+        
+        run();
+    }
 }
