@@ -117,5 +117,4 @@ class MainFrame extends JFrame implements ChangeListener
         SettingsData result = SettingsDialog.createNewDialog(this);
         return (result);
     }
-    
 }
