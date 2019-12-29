@@ -23,6 +23,8 @@ class SQLService
 	
     public Connection connection = null;
     
+    SQLService() {}
+    
     SQLService(String server_address, String server_port, 
                String username, String user_password)
 		throws NullPointerException
@@ -71,6 +73,23 @@ class SQLService
 		
 		return(result);
 	}
+    
+    public ArrayList<TableInfo2> getData()
+    {
+        ArrayList<TableInfo2> tables = new ArrayList<TableInfo2>();
+        
+        tables.add(new TableInfo2("name1", "desc1"));
+        tables.get(tables.size() - 1).insertRow("1field name1", "field desc1");
+        tables.get(tables.size() - 1).insertRow("1field name2", "field desc2");
+        tables.get(tables.size() - 1).insertRow("1field name3", "field desc3");
+        
+        tables.add(new TableInfo2("name2", "desc2"));
+        tables.get(tables.size() - 1).insertRow("2field name1", "field desc1");
+        tables.get(tables.size() - 1).insertRow("2field name2", "field desc2");
+        tables.get(tables.size() - 1).insertRow("2field name3", "field desc3");
+        
+        return tables;
+    }
 	
 	
 	public void run_dba(Vector<TableInfo> fid, Vector<FieldInfo> di, 

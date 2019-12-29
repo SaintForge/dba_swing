@@ -1,5 +1,7 @@
 package dba;
 
+import java.util.ArrayList;
+
 import javax.swing.JPanel;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
@@ -56,8 +58,78 @@ class Table extends JPanel
 		add(scrollPane, BorderLayout.CENTER);
     }
     
+    // populate data functions
+    
+    public void populateTableProps(TableInfo2 tableInfo)
+    {
+        System.out.println("populateTableProps");
+        
+        String tableProperties[] = 
+		{
+			"File Name",
+			"Description",
+			"Primary Keys",
+			"Global Name",
+			"Global Reference",
+			"Default Data Item List",
+			"Required Data Item List",
+			"Last Updated",
+			"User ID"
+		};
+        
+        String tableData[] = 
+        {
+            "",
+            "",
+            tableInfo.getKeys(),
+            tableInfo.getGlobal(),
+            "",
+            "",
+            "",
+            "",
+            ""
+        };
+        
+        populateTable(tableProperties, tableData);
+        
+        //table.setModel(model);
+        //model.fireTableDataChanged();
+    }
+    
+    public void populateTableArray(ArrayList<TableInfo2> tableArray)
+    {
+        model.setRowCount(0);
+        
+        for (int i = 0; i < tableArray.size(); ++i)
+        {
+            String row[] = new String[2];
+            row[0] = tableArray.get(i).getName();
+            row[1] = tableArray.get(i).getDesc();
+            model.addRow(row);
+        }
+        
+        table.setModel(model);
+        model.fireTableDataChanged();
+    }
+    public void populateFieldArray(ArrayList<FieldInfo2> fieldArray)
+    {
+        model.setRowCount(0);
+        
+        for (int i = 0; i < fieldArray.size(); ++i)
+        {
+            String row[] = new String[2];
+            row[0] = fieldArray.get(i).getName();
+            row[1] = fieldArray.get(i).getDesc();
+            model.addRow(row);
+        }
+        
+        table.setModel(model);
+        model.fireTableDataChanged();
+    }
+    
     public void populateTable(String data[])
     {
+        System.out.println("populateTable");
         model.setRowCount(0);
         
         for(int i = 0; i < data.length; ++i)

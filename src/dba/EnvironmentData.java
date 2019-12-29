@@ -1,11 +1,11 @@
 package dba;
 
-
+import java.util.ArrayList;
 
 class EnvironmentData
 {
 	SettingsData settings;
-	// ArrayList<T> data;
+	ArrayList<TableInfo2> tableArray;
 	
 	EnvironmentData(SettingsData settings) 
 	{
@@ -27,4 +27,14 @@ class EnvironmentData
 	{
 		this.settings = settings;
 	}
+    
+    public ArrayList<TableInfo2> getTableArray()
+    {
+        return tableArray;
+    }
+    
+    public void setTableArray(ArrayList<TableInfo2> tableArray)
+    {
+        this.tableArray = tableArray;
+    }
 }

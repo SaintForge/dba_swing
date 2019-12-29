@@ -1,5 +1,7 @@
 package dba;
 
+import java.util.ArrayList;
+
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
@@ -35,13 +37,16 @@ class MainFrame extends JFrame implements ChangeListener
         String data1[] = {"table1", "table2", "table3"};
         String data2[] = {"desc1", "desc2", "desc3"};
         
-        DBForm form = new DBForm(settings, this, data1, data2);
+        SQLService sql = new SQLService();
+        ArrayList<TableInfo2> tableArray = sql.getData();
+        
+        DBForm form = new DBForm(settings, this);
+        form.populateData(tableArray);
         
         tabs.addTab(settings.getName(), null, form.getPanel(), null);
         tabs.setMnemonicAt(0, KeyEvent.VK_1);
         
         tabs.setTabComponentAt(0, new ButtonTabComponent(tabs));
-        
         
         settings.setName("vtbCR810bqa");
         settings.setSqlServer("172.29.7.82");

@@ -1,5 +1,7 @@
 package dba;
 
+import java.util.ArrayList;
+
 import javax.swing.JFrame; 
 import javax.swing.JLabel; 
 import javax.swing.JPanel; 
@@ -15,16 +17,22 @@ import javax.swing.BorderFactory;
 import javax.swing.border.EtchedBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.SwingUtilities;
+import javax.swing.JTabbedPane;
+
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 
 import java.awt.Font;
 import java.awt.Insets;
+import java.awt.Component;
 import java.awt.BorderLayout;
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 
-class DBForm implements ActionListener, DocumentListener
+class DBForm implements ActionListener, DocumentListener, MouseListener
 {
 	JFrame frame;
 	EnvironmentData data;
@@ -101,6 +109,9 @@ class DBForm implements ActionListener, DocumentListener
 		
 		this.panel.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));
         
+        tableList.getTable().addMouseListener(this);
+        fieldList.getTable().addMouseListener(this);
+        
 	}
     
     DBForm(SettingsData settings, JFrame frame, String data1[], String data2[])
@@ -108,6 +119,15 @@ class DBForm implements ActionListener, DocumentListener
         this(settings, frame);
         tableList.populateTable(data1, data2);
     }
+    
+    
+	public JPanel getPanel() {
+		return panel;
+	}
+	
+	public void setPanel(JPanel panel) {
+		this.panel = panel;
+	}
 	
 	public JPanel createNewTable(String firstName, String secondName)
 	{
@@ -129,22 +149,20 @@ class DBForm implements ActionListener, DocumentListener
 		
 		return panel;
 	}
-	
-	public JPanel getPanel() {
-		return panel;
-	}
-	
-	public void setPanel(JPanel panel) {
-		this.panel = panel;
-	}
-	
-	public static DBForm createNewForm(SettingsData settings, JFrame frame)
+    
+    public static DBForm createNewForm(SettingsData settings, JFrame frame)
 	{
 		DBForm dbForm = new DBForm(settings, frame);
 		return dbForm;
 	}
-	
-	public void actionPerformed(ActionEvent event) 
+    
+    public void populateData(ArrayList<TableInfo2> tableArray)
+    {
+        data.setTableArray(tableArray);
+        tableList.populateTableArray(tableArray);
+    }
+    
+    public void actionPerformed(ActionEvent event) 
 	{
         System.out.println("DBForm.actionPerformed");
 		if (event.getSource() == refreshAllButton) {
@@ -203,4 +221,79 @@ class DBForm implements ActionListener, DocumentListener
     {
         
     }
+    
+    @Override
+        public void mouseClicked(MouseEvent event)
+    {
+        if (event.getSource() == tableList.getTable())
+        {
+            if (SwingUtilities.isLeftMouseButton(event))
+            {
+                int rowIndex = tableList.getTable().getSelectedRow();
+                rowIndex = tableList.getTable().convertRowIndexToModel(rowIndex);
+                
+                if (rowIndex != -1)
+                {
+                    if (rowIndex < data.getTableArray().size())
+                    {
+                        TableInfo2 tableInfo2 = data.getTableArray().get(rowIndex);
+                        fieldList.populateFieldArray(tableInfo2.getFields());
+                        
+                        JTabbedPane tabs = tableInfo.getTabs();
+                        for (int tabIndex = 0; tabIndex < tabs.getTabCount(); ++tabIndex)
+                        {
+                            //Component component = tabs.getTabComponentAt(tabIndex);
+                            switch(tabIndex)
+                            {
+                                case 0: // Table Properties
+                                {
+                                    System.out.println("Table Properties");
+                                    
+                                    Component comp = tabs.getComponentAt(tabIndex);
+                                    if (comp == null)
+                                        System.out.println("suck ass");
+                                    
+                                    Table tableProps = (Table)comp;
+                                    if (tableProps == null)
+                                        System.out.println("suck ass");
+                                    
+                                    
+                                    tableProps.populateTableProps(tableInfo2);
+                                    //System.out.println(tableProps.testName);
+                                    
+                                } break;
+                                
+                                case 1: // Table Indexes
+                                {
+                                    
+                                } break;
+                                
+                                case 2: // Table Documentation
+                                {
+                                    
+                                } break;
+                            }
+                        }
+                        
+                    }
+                }
+            }
+        }
+        else if (event.getSource() == fieldList.getTable())
+        {
+            
+        }
+    }
+    
+    @Override
+		public void mouseExited(MouseEvent event) {}
+	
+	@Override
+		public void mouseEntered(MouseEvent event) {}
+	
+	@Override
+		public void mousePressed(MouseEvent event) {}
+	
+	@Override
+		public void mouseReleased(MouseEvent event) {}
 }

@@ -27,4 +27,9 @@ class TabbedTable extends JPanel
     {
         tabs.addTab(name, null, tab, null);
     }
+    
+    public JTabbedPane getTabs()
+    {
+        return tabs;
+    }
 }
