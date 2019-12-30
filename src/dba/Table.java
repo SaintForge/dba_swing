@@ -48,8 +48,7 @@ class Table extends JPanel
         model.addColumn(secondColumnName);
         
         table = new JTable(model);
-        //table.setPreferredScrollableViewportSize(table.getPreferredSize());
-		table.setFillsViewportHeight(true);
+        table.setFillsViewportHeight(true);
 		table.setFont(new Font("Courier New", Font.PLAIN, 14));
 		table.setShowVerticalLines(true);
         
@@ -59,7 +58,6 @@ class Table extends JPanel
     }
     
     // populate data functions
-    
     public void populateTableProps(TableInfo2 tableInfo)
     {
         System.out.println("populateTableProps");

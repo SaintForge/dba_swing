@@ -47,6 +47,8 @@ class TableInfo2
     
     ArrayList<FieldInfo2> fields;
     
+    TableInfo2() {}
+    
     TableInfo2(String name, String desc)
     {
         this.name = name;

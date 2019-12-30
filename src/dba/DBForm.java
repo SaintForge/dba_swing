@@ -58,45 +58,61 @@ class DBForm implements ActionListener, DocumentListener, MouseListener
 	{
 		this.frame = frame;
         
+        // initializing basic data settings
 		data = new EnvironmentData(settings);
         
+        // initializing table list
 		tableList = new Table("Table Name", "Description");
+        tableList.getTable().addMouseListener(this);
         
+        // initializing table info
         tableInfo = new TabbedTable();
         tableInfo.addTab("Table Properties", new Table("Properties", "Description"));
         tableInfo.addTab("Index", new SplitPane());
         tableInfo.addTab("Table Documentation", new TextArea());
         
+        JTabbedPane tabs = tableInfo.getTabs();
+        Table tableProps = (Table)tabs.getComponentAt(0);
+        tableProps.populateTableProps(new TableInfo2());
+        
+        // initializing field list
         fieldList = new Table("Field Name", "Description");
+        fieldList.getTable().addMouseListener(this);
+        
+        // initializing field info
         fieldInfo = new TabbedTable();
         fieldInfo.addTab("Column Properties", new Table("Properties", "Description"));
         fieldInfo.addTab("Column Documentation", new TextArea());
         
+        // initializing refresh button "Update All"
         refreshAllButton = new JButton("Update All");
 		refreshAllButton.addActionListener(this);
 		
+        // initializing settings button 
 		settingsButton = new JButton("Settings");
 		settingsButton.addActionListener(this);
         
+        // initializing refresh table button
         refreshTableButton = new JButton("Update Table");
 		refreshTableButton.addActionListener(this);
 		
+        // initializing texfield for table list
 		tableSearch = new JTextField();
         tableSorter = new TableRowSorter<TableModel>(tableList.getModel());
         tableSearch.getDocument().addDocumentListener(this);
         tableList.setRowSorter(tableSorter);
         
+        // initializing texfield for field list
         fieldSearch = new JTextField();
         fieldSorter = new TableRowSorter<TableModel>(fieldList.getModel());
         fieldSearch.getDocument().addDocumentListener(this);
         fieldList.setRowSorter(fieldSorter);
         
+        // initializing all objects's layouts
 		this.panel.add(tableSearch,  new GridBagConstraints(0, 0, 1, 1, 1.0, 0.01, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(2, 2, 2, 2), 100, 0));
 		this.panel.add(refreshAllButton,  new GridBagConstraints(2, 0, 1, 1, 1.0, 0.01, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(2, 2, 2, 80), 0, 0));
 		this.panel.add(settingsButton,  new GridBagConstraints(2, 0, 1, 1, 1.0, 0.01, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(2, 2, 2, 2), 0, 0));
 		
-		fieldSearch = new JTextField();
-        fieldSearch.getDocument().addDocumentListener(this);
 		this.panel.add(fieldSearch,  new GridBagConstraints(3, 0, 1, 1, 1.0, 0.01, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(2, 2, 2, 2), 100, 0));
 		this.panel.add(new JLabel(""),  new GridBagConstraints(5, 0, 1, 1, 1.0, 0.01, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(2, 2, 2, 140), 0, 0));
 		this.panel.add(refreshTableButton,  new GridBagConstraints(5, 0, 2, 1, 1.0, 0.01, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(2, 2, 2, 2), 0, 0));
@@ -107,12 +123,9 @@ class DBForm implements ActionListener, DocumentListener, MouseListener
 		this.panel.add(fieldList,  new GridBagConstraints(3, 1, 3, 1, 1.0, 0.7, GridBagConstraints.WEST, GridBagConstraints.BOTH, new Insets(2, 2, 2, 2), 0, 0));
 		this.panel.add(fieldInfo,  new GridBagConstraints(3, 2, 3, 1, 1.0, 0.4, GridBagConstraints.WEST, GridBagConstraints.BOTH, new Insets(2, 2, 2, 2), 0, 0));
 		
+        // setting border
 		this.panel.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));
-        
-        tableList.getTable().addMouseListener(this);
-        fieldList.getTable().addMouseListener(this);
-        
-	}
+    }
     
     DBForm(SettingsData settings, JFrame frame, String data1[], String data2[])
     {
@@ -120,16 +133,7 @@ class DBForm implements ActionListener, DocumentListener, MouseListener
         tableList.populateTable(data1, data2);
     }
     
-    
-	public JPanel getPanel() {
-		return panel;
-	}
-	
-	public void setPanel(JPanel panel) {
-		this.panel = panel;
-	}
-	
-	public JPanel createNewTable(String firstName, String secondName)
+    JPanel createNewTable(String firstName, String secondName)
 	{
 		JPanel panel = new JPanel(new BorderLayout());
 		panel.setBorder(BorderFactory.createEtchedBorder());
@@ -156,24 +160,32 @@ class DBForm implements ActionListener, DocumentListener, MouseListener
 		return dbForm;
 	}
     
-    public void populateData(ArrayList<TableInfo2> tableArray)
+    
+    public JPanel getPanel() {
+		return panel;
+	}
+	public void setPanel(JPanel panel) {
+		this.panel = panel;
+	}
+    
+	public void populateData(ArrayList<TableInfo2> tableArray)
     {
         data.setTableArray(tableArray);
         tableList.populateTableArray(tableArray);
     }
     
+    // event handlers
     public void actionPerformed(ActionEvent event) 
 	{
-        System.out.println("DBForm.actionPerformed");
-		if (event.getSource() == refreshAllButton) {
+        if (event.getSource() == refreshAllButton) {
+            
 			System.out.println("refreshAllButton");
 		}
 		if (event.getSource() == settingsButton) 
 		{
 			System.out.println("settingsButton");
 			
-            // NOTE(Sierra): Look for backward event in order to tell MainFrame that we want to delete the whole tab
-			SettingsData newSettings = SettingsDialog.updateNewDialog(frame, data.getSettings());
+            SettingsData newSettings = SettingsDialog.updateNewDialog(frame, data.getSettings());
 			data.setSettings(newSettings);
 		}
 	}
@@ -247,19 +259,8 @@ class DBForm implements ActionListener, DocumentListener, MouseListener
                             {
                                 case 0: // Table Properties
                                 {
-                                    System.out.println("Table Properties");
-                                    
-                                    Component comp = tabs.getComponentAt(tabIndex);
-                                    if (comp == null)
-                                        System.out.println("suck ass");
-                                    
-                                    Table tableProps = (Table)comp;
-                                    if (tableProps == null)
-                                        System.out.println("suck ass");
-                                    
-                                    
+                                    Table tableProps = (Table)tabs.getComponentAt(tabIndex);
                                     tableProps.populateTableProps(tableInfo2);
-                                    //System.out.println(tableProps.testName);
                                     
                                 } break;
                                 

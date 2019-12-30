@@ -34,10 +34,8 @@ class SQLService
 		this.username = username;
 		this.password = user_password;
 		
-		//this.url = "protocol=jdbc:sanchez|database=" + this.address + ":" + this.port + ":SCA$IBS|dateFormat=mm/dd/yyyy|fileEncoding=UTF-8";
-        
-        this.url = "protocol=jdbc:sanchez/database=172.29.7.82:19215:SCA$IBS/locale=US:ENGLISH/timeOut=2/transType=MTM/rowPrefetch=3000/signOnType=1/fileEncoding=UTF-8";
-	}
+		this.url = "protocol=jdbc:sanchez/database="+ server_address + ":" + server_port + ":SCA$IBS/locale=US:ENGLISH/timeOut=2/transType=MTM/rowPrefetch=3000/signOnType=1/fileEncoding=UTF-8";
+    }
 	
 	public void connect() 
 		throws ClassNotFoundException, SQLException
@@ -90,10 +88,54 @@ class SQLService
         
         return tables;
     }
+    
+    public void runDba(Vector<TableInfo2> fid, Vector<FieldInfo2> di, 
+                       int fid_fetch, int di_fetch)
+        throws SQLException
+    {
+        long time1 = System.currentTimeMillis();
+        
+        String sql = "SELECT FID, ACCKEYS, PARFID, DES, GLREF, GLOBAL, LISTDFT, LISTREQ, LTD, USER FROM DBTBL1 ORDER BY FID";
+        PreparedStatement prep = connection.prepareStatement(sql);
+        prep.setFetchSize(fid_fetch);
+        ResultSet rs_fid = prep.executeQuery();
+		
+        String FID = "";
+        String LFID = "";
+        
+        int tbl_index = 0;
+        int fid_index = 0;
+        int counter = 0;
+		
+        int tbl_counter = 0;
+		while(rs_fid.next())
+		{
+            FID = rs_fid.getString(1);
+            
+			fid.add(new TableInfo2(FID, rs_fid.getString(4)));
+            
+            String newSql = "SELECT FID, DI, NOD, POS, DES, TYP, LEN, DEC, REQ, TBL, CMP FROM DBTBL1D WHERE FID = ? ORDER BY DI";
+            PreparedStatement prepNew = connection.prepareStatement(newSql);
+            prepNew.setFetchSize(100);
+            prepNew.setString(1, FID);
+            
+            ResultSet rs = prepNew.executeQuery();
+            
+            while(rs.next())
+            {
+                String DI = rs.getString("DI");
+                System.out.println("FID: " + FID + " DI: " + DI);
+            }
+            
+            System.out.println(FID);
+            
+			tbl_counter++;
+		}
+    }
 	
 	
-	public void run_dba(Vector<TableInfo> fid, Vector<FieldInfo> di, 
-						int fid_fetch, int di_fetch)
+    public void run_dba(Vector<TableInfo> fid, Vector<FieldInfo> di, 
+                        int fid_fetch, int di_fetch)
 		throws SQLException
 	{
         long time1 = System.currentTimeMillis();
@@ -116,6 +158,8 @@ class SQLService
             FID = rs_fid.getString(1);
             
 			fid.add(new TableInfo(FID, rs_fid.getString(2), rs_fid.getString(3), rs_fid.getString(4), rs_fid.getString(5), rs_fid.getString(6), rs_fid.getString(7),rs_fid.getString(8),rs_fid.getString(9),rs_fid.getString(10)));
+            
+            System.out.println(FID);
             
 			tbl_counter++;
 		}
@@ -161,6 +205,8 @@ class SQLService
             }
             
             di.add(new FieldInfo(FID, rs_di.getString(2), rs_di.getString(3), rs_di.getString(4), rs_di.getString(5), rs_di.getString(6), rs_di.getString(7), rs_di.getString(8), rs_di.getString(9), rs_di.getString(10), rs_di.getString(11)));
+            
+            System.out.println(FID);
             
             LFID = FID;
         }

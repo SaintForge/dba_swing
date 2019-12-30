@@ -1,6 +1,9 @@
 package dba;
 
-// import java.sql.*;
+import java.sql.*;
+
+import java.util.Vector;
+
 import sanchez.jdbc.driver.ScDriver;
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
@@ -13,6 +16,34 @@ public class Main
 {
     public static void run()
     {
+        try
+        {
+            SQLService sql = new SQLService("172.29.7.82", "20101", "1", "xxx");
+            sql.connect();
+            
+            //Vector<TableInfo> fid = new Vector<TableInfo>();
+            //Vector<FieldInfo> di = new Vector<FieldInfo>();
+            
+            //sql.run_dba(fid, di, 4000, 10000);
+            
+            Vector<TableInfo2> fid = new Vector<TableInfo2>();
+            Vector<FieldInfo2> di = new Vector<FieldInfo2>();
+            
+            sql.runDba(fid, di, 4000, 10000);
+            
+            
+            System.out.println("completed.");
+        }
+        catch(ClassNotFoundException exc)
+        {
+            
+        }
+        catch(SQLException exc)
+        {
+            
+        }
+        
+        
         MainFrame main = new MainFrame();
     }
     
