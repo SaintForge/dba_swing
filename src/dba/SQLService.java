@@ -9,6 +9,8 @@ import sanchez.jdbc.pool.ScJdbcPool;
 import java.util.Properties;
 import java.util.ArrayList;
 import java.util.Vector;
+import java.util.HashMap;
+import java.util.Map;
 
 class SQLService
 {
@@ -72,149 +74,126 @@ class SQLService
 		return(result);
 	}
     
-    public ArrayList<TableInfo2> getData()
+    public ArrayList<TableInfo> getData()
     {
-        ArrayList<TableInfo2> tables = new ArrayList<TableInfo2>();
+        ArrayList<TableInfo> tables = new ArrayList<TableInfo>();
         
-        tables.add(new TableInfo2("name1", "desc1"));
-        tables.get(tables.size() - 1).insertRow("1field name1", "field desc1");
-        tables.get(tables.size() - 1).insertRow("1field name2", "field desc2");
-        tables.get(tables.size() - 1).insertRow("1field name3", "field desc3");
+        tables.add(new TableInfo());
+        //tables.get(tables.size() - 1).insertRow("1field name1", "field desc1");
+        //tables.get(tables.size() - 1).insertRow("1field name2", "field desc2");
+        //tables.get(tables.size() - 1).insertRow("1field name3", "field desc3");
         
-        tables.add(new TableInfo2("name2", "desc2"));
-        tables.get(tables.size() - 1).insertRow("2field name1", "field desc1");
-        tables.get(tables.size() - 1).insertRow("2field name2", "field desc2");
-        tables.get(tables.size() - 1).insertRow("2field name3", "field desc3");
+        tables.add(new TableInfo());
+        //tables.get(tables.size() - 1).insertRow("2field name1", "field desc1");
+        //tables.get(tables.size() - 1).insertRow("2field name2", "field desc2");
+        //tables.get(tables.size() - 1).insertRow("2field name3", "field desc3");
         
         return tables;
     }
-    
-    public void runDba(Vector<TableInfo2> fid, Vector<FieldInfo2> di, 
-                       int fid_fetch, int di_fetch)
-        throws SQLException
-    {
-        long time1 = System.currentTimeMillis();
-        
-        String sql = "SELECT FID, ACCKEYS, PARFID, DES, GLREF, GLOBAL, LISTDFT, LISTREQ, LTD, USER FROM DBTBL1 ORDER BY FID";
-        PreparedStatement prep = connection.prepareStatement(sql);
-        prep.setFetchSize(fid_fetch);
-        ResultSet rs_fid = prep.executeQuery();
-		
-        String FID = "";
-        String LFID = "";
-        
-        int tbl_index = 0;
-        int fid_index = 0;
-        int counter = 0;
-		
-        int tbl_counter = 0;
-		while(rs_fid.next())
-		{
-            FID = rs_fid.getString(1);
-            
-			fid.add(new TableInfo2(FID, rs_fid.getString(4)));
-            
-            String newSql = "SELECT FID, DI, NOD, POS, DES, TYP, LEN, DEC, REQ, TBL, CMP FROM DBTBL1D WHERE FID = ? ORDER BY DI";
-            PreparedStatement prepNew = connection.prepareStatement(newSql);
-            prepNew.setFetchSize(100);
-            prepNew.setString(1, FID);
-            
-            ResultSet rs = prepNew.executeQuery();
-            
-            while(rs.next())
-            {
-                String DI = rs.getString("DI");
-                System.out.println("FID: " + FID + " DI: " + DI);
-            }
-            
-            System.out.println(FID);
-            
-			tbl_counter++;
-		}
-    }
 	
-	
-    public void run_dba(Vector<TableInfo> fid, Vector<FieldInfo> di, 
-                        int fid_fetch, int di_fetch)
-		throws SQLException
+    public void run_dba(ArrayList<TableInfo> fid, int fid_fetch, int di_fetch) throws SQLException
+                        
 	{
-        long time1 = System.currentTimeMillis();
-        
-        String sql = "SELECT FID, ACCKEYS, PARFID, DES, GLREF, GLOBAL, LISTDFT, LISTREQ, LTD, USER FROM DBTBL1 ORDER BY FID";
+        long time1      = System.currentTimeMillis();
+        String fileName = "";
+		int fileIndex   = 0;
+		
+		HashMap<String, Integer> tableMap = new HashMap<String, Integer>();
+		
+		String sql = "SELECT FID, ACCKEYS, DES, GLREF, GLOBAL, LISTDFT, LISTREQ, LTD, USER FROM DBTBL1 ORDER BY FID";
         PreparedStatement prep = connection.prepareStatement(sql);
         prep.setFetchSize(fid_fetch);
+		
         ResultSet rs_fid = prep.executeQuery();
-		
-        String FID = "";
-        String LFID = "";
-        
-        int tbl_index = 0;
-        int fid_index = 0;
-        int counter = 0;
-		
-        int tbl_counter = 0;
 		while(rs_fid.next())
 		{
-            FID = rs_fid.getString(1);
+			fileName = rs_fid.getString(1);
             
-			fid.add(new TableInfo(FID, rs_fid.getString(2), rs_fid.getString(3), rs_fid.getString(4), rs_fid.getString(5), rs_fid.getString(6), rs_fid.getString(7),rs_fid.getString(8),rs_fid.getString(9),rs_fid.getString(10)));
+			fid.add(new TableInfo(fileName,              // File Name
+								  rs_fid.getString(2),   // Primary Keys
+								  rs_fid.getString(3),   // Description
+								  rs_fid.getString(4),   // Global Name
+								  rs_fid.getString(5),   // Global Reference
+								  rs_fid.getString(6),   // Default Data Item List
+								  rs_fid.getString(7),   // Required Data Item List
+								  rs_fid.getString(8),   // Last Updated
+								  rs_fid.getString(9))); // User ID
             
-            System.out.println(FID);
-            
-			tbl_counter++;
+			tableMap.put(fileName, fileIndex++);
 		}
-        
-        sql = "SELECT FID, DI, NOD, POS, DES, TYP, LEN, DEC, REQ, TBL, CMP FROM DBTBL1D ORDER BY FID,DI";
+		
+		System.out.println("HashMap size: " + tableMap.size());
+		System.out.println("tbl_counter: " + fileIndex);
+		
+        sql = "SELECT FID, DI, NOD, POS, DES, TYP, LEN, DEC, REQ, TBL, CMP FROM DBTBL1D";
         PreparedStatement prep1 = connection.prepareStatement(sql);
         prep1.setFetchSize(di_fetch);
         prep1.setMaxRows(35000);
+		
         ResultSet rs_di = prep1.executeQuery();
-        
-        LFID = ""; FID = "";
-        counter = 0;
-        
         while(rs_di.next())
         {
+             fileName = rs_di.getString(1);
             
-            FID = rs_di.getString(1);
-            
-            if (LFID == "") LFID = FID;
-            
-            if (FID.equals(LFID))
-            {
-                counter = counter + 1;
-            }
-            else
-            {
-                /*
-                System.out.println("fid_index = " + fid_index);
-                System.out.println("tbl_index = " + tbl_index);
-                System.out.println("tbl_counter = " + fid.size());
-                System.out.println("FID = " + FID);
-                System.out.println("LFID = " + LFID);
-                System.out.println("fid.get(tbl_index).fid = " + fid.get(tbl_index).fid);
-                */
-                
-                fid.get(tbl_index).index  = fid_index;
-                fid.get(tbl_index).amount = counter;
-                
-                tbl_index = tbl_index + 1;
-                fid_index = fid_index + counter;
-                
-                counter = 1;
-            }
-            
-            di.add(new FieldInfo(FID, rs_di.getString(2), rs_di.getString(3), rs_di.getString(4), rs_di.getString(5), rs_di.getString(6), rs_di.getString(7), rs_di.getString(8), rs_di.getString(9), rs_di.getString(10), rs_di.getString(11)));
-            
-            System.out.println(FID);
-            
-            LFID = FID;
+			if(tableMap.containsKey(fileName))
+			{
+				 fileIndex = tableMap.get(fileName);
+				fid.get(fileIndex).getFields().add(new FieldInfo(fileName,              // File Name
+																 rs_di.getString(2),    // Field Name
+																 rs_di.getString(3),    // Subscript Key
+																 rs_di.getString(4),    // Field Position
+																 rs_di.getString(5),    // Description
+																 rs_di.getString(6),    // Data Type
+																 rs_di.getString(7),    // Field Length
+																 rs_di.getString(8),    // Decimal Precision
+																 rs_di.getString(9),    // Required Indicator
+																 rs_di.getString(10),   // Look-Up Table
+																 rs_di.getString(11))); // Computed Expression
+			}
+			
         }
-        
-        fid.get(tbl_index).index  = fid_index;
-        fid.get(tbl_index).amount = counter;
-        
-        long time2 = System.currentTimeMillis();
+		
+		sql = "SELECT FID, INDEXNM, GLOBAL, ORDERBY, IDXDESC, UPCASE, PARFID FROM DBTBL8";
+		PreparedStatement prep2 = connection.prepareStatement(sql);
+		prep2.setFetchSize(500);
+		
+		ResultSet rsIndex = prep2.executeQuery();
+		while(rsIndex.next())
+		{
+			fileName = rsIndex.getString(1);
+			
+			if (tableMap.containsKey(fileName))
+			{
+				fileIndex = tableMap.get(fileName);
+				fid.get(fileIndex).getIndexes().add(new IndexInfo(rsIndex.getString(2),   // Index Name
+																  rsIndex.getString(3),   // Global Name
+																  rsIndex.getString(4),   // Order by
+																  rsIndex.getString(5),   // Index Description
+																  rsIndex.getString(6),   // Convert To Upper Case
+																  rsIndex.getString(7))); // Super Type File Name
+			}
+		}
+		
+		sql = "SELECT FID, DES FROM DBTBL1TBLDOC";
+		PreparedStatement prep3 = connection.prepareStatement(sql);
+		prep3.setFetchSize(7000);
+		
+		ResultSet rsDocs = prep3.executeQuery();
+		while(rsDocs.next())
+		{
+			fileName = rsDocs.getString(1);
+			
+			if (tableMap.containsKey(fileName))
+			{
+				fileIndex = tableMap.get(fileName);
+				
+				TableInfo tableInfo = fid.get(fileIndex);
+				String fileDocumentation = tableInfo.getFileDocumentation() + rsDocs.getString(2) + '\n';
+				tableInfo.setFileDocumentation(fileDocumentation);
+			}
+		}
+		
+        long time2  = System.currentTimeMillis();
         float diff  = (time2 - time1) / 1024.0f;
         System.out.println("Time elapsed (sec): " + diff);
         

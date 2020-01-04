@@ -58,7 +58,7 @@ class Table extends JPanel
     }
     
     // populate data functions
-    public void populateTableProps(TableInfo2 tableInfo)
+    public void populateTableProps(TableInfo tableInfo)
     {
         System.out.println("populateTableProps");
         
@@ -77,15 +77,15 @@ class Table extends JPanel
         
         String tableData[] = 
         {
-            "",
-            "",
-            tableInfo.getKeys(),
-            tableInfo.getGlobal(),
-            "",
-            "",
-            "",
-            "",
-            ""
+            tableInfo.getFileName(),
+            tableInfo.getDescription(),
+            tableInfo.getPrimaryKeys(),
+            tableInfo.getGlobalName(),
+            tableInfo.getGlobalReference(),
+            tableInfo.getDefaultDataItemList(),
+            tableInfo.getRequiredDataItemList(),
+            tableInfo.getLastUpdated(),
+            tableInfo.getUserID()
         };
         
         populateTable(tableProperties, tableData);
@@ -94,30 +94,30 @@ class Table extends JPanel
         //model.fireTableDataChanged();
     }
     
-    public void populateTableArray(ArrayList<TableInfo2> tableArray)
+    public void populateTableArray(ArrayList<TableInfo> tableArray)
     {
         model.setRowCount(0);
         
         for (int i = 0; i < tableArray.size(); ++i)
         {
             String row[] = new String[2];
-            row[0] = tableArray.get(i).getName();
-            row[1] = tableArray.get(i).getDesc();
+            row[0] = tableArray.get(i).getFileName();
+            row[1] = tableArray.get(i).getDescription();
             model.addRow(row);
         }
         
         table.setModel(model);
         model.fireTableDataChanged();
     }
-    public void populateFieldArray(ArrayList<FieldInfo2> fieldArray)
+    public void populateFieldArray(ArrayList<FieldInfo> fieldArray)
     {
         model.setRowCount(0);
         
         for (int i = 0; i < fieldArray.size(); ++i)
         {
             String row[] = new String[2];
-            row[0] = fieldArray.get(i).getName();
-            row[1] = fieldArray.get(i).getDesc();
+            row[0] = fieldArray.get(i).getFieldName();
+            row[1] = fieldArray.get(i).getDescription();
             model.addRow(row);
         }
         

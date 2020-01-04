@@ -73,7 +73,7 @@ class DBForm implements ActionListener, DocumentListener, MouseListener
         
         JTabbedPane tabs = tableInfo.getTabs();
         Table tableProps = (Table)tabs.getComponentAt(0);
-        tableProps.populateTableProps(new TableInfo2());
+        tableProps.populateTableProps(new TableInfo());
         
         // initializing field list
         fieldList = new Table("Field Name", "Description");
@@ -168,7 +168,7 @@ class DBForm implements ActionListener, DocumentListener, MouseListener
 		this.panel = panel;
 	}
     
-	public void populateData(ArrayList<TableInfo2> tableArray)
+	public void populateData(ArrayList<TableInfo> tableArray)
     {
         data.setTableArray(tableArray);
         tableList.populateTableArray(tableArray);
@@ -248,8 +248,8 @@ class DBForm implements ActionListener, DocumentListener, MouseListener
                 {
                     if (rowIndex < data.getTableArray().size())
                     {
-                        TableInfo2 tableInfo2 = data.getTableArray().get(rowIndex);
-                        fieldList.populateFieldArray(tableInfo2.getFields());
+                        TableInfo tableInfoData = data.getTableArray().get(rowIndex);
+                        fieldList.populateFieldArray(tableInfoData.getFields());
                         
                         JTabbedPane tabs = tableInfo.getTabs();
                         for (int tabIndex = 0; tabIndex < tabs.getTabCount(); ++tabIndex)
@@ -260,7 +260,7 @@ class DBForm implements ActionListener, DocumentListener, MouseListener
                                 case 0: // Table Properties
                                 {
                                     Table tableProps = (Table)tabs.getComponentAt(tabIndex);
-                                    tableProps.populateTableProps(tableInfo2);
+                                    tableProps.populateTableProps(tableInfoData);
                                     
                                 } break;
                                 

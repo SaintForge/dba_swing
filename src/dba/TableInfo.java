@@ -6,109 +6,143 @@ import java.io.Serializable;
 
 class TableInfo implements Serializable
 {
-	String fid;
-	String acckeys;
-	String parfid;
-	String des;
-	String glref;
-	String global;
-	String listdft;
-	String listreq;
-	String ltd;
-	String user;
+	private String fileName;
+	private String primaryKeys;
+	private String description;
+	private String globalName;
+	private String globalReference;
+	private String defaultDataItemList;
+	private String requiredDataItemList;
+	private String lastUpdated;
+	private String userID;
 	
-	int index;
-	int amount;
+	private String fileDocumentation;
 	
-	TableInfo() {}
+	private ArrayList<FieldInfo> fields = new ArrayList<FieldInfo>();
+	private ArrayList<IndexInfo> indexes = new ArrayList<IndexInfo>();
 	
-	TableInfo(String fid, String acckeys, String parfid, String des, String glref, String global,String listdft, String listreq, String ltd, String user)
+	public TableInfo() {}
+	public TableInfo(String fileName, String primaryKeys, String description, String globalName, String globalReference, 
+					  String defaultDataItemList, String requiredDataItemList, String lastUpdated, String userID)
 	{
-		this.fid = fid;
-		this.acckeys = acckeys;
-		this.parfid = parfid;
-		this.des = des;
-		this.glref = glref;
-		this.global = global;
-		this.listdft = listdft;
-		this.listreq = listreq;
-		this.ltd = ltd;
-		this.user = user;
+		this.fileName = fileName;
+		this.primaryKeys = primaryKeys;
+		this.description = description;
+		this.globalName = globalName;
+		this.globalReference = globalReference;
+		this.defaultDataItemList = defaultDataItemList;
+		this.requiredDataItemList = requiredDataItemList;
+		this.lastUpdated = lastUpdated;
+		this.userID = userID;
+		
+		this.fileDocumentation = "";
 	}
-}
-
-class TableInfo2
-{
-    String name;
-    String desc;
-    
-    String global;
-    String keys;
-    
-    ArrayList<FieldInfo2> fields;
-    
-    TableInfo2() {}
-    
-    TableInfo2(String name, String desc)
-    {
-        this.name = name;
-        this.desc = desc;
-        
-        this.global = "global";
-        this.keys = "keys";
-        
-        fields = new ArrayList<FieldInfo2>();
-    }
-    
-    public void insertRow(String name, String desc)
-    {
-        fields.add(new FieldInfo2(name, desc));
-    }
-    
-    public String getName()
-    {
-        return name;
-    }
-    public void setName(String name)
-    {
-        this.name = name;
-    }
-    
-    public String getDesc()
-    {
-        return desc;
-    }
-    public void setDesc(String desc)
-    {
-        this.desc = desc;
-    }
-    
-    public void setFields(ArrayList<FieldInfo2> fieldArray)
-    {
-        this.fields = fieldArray;
-    }
-    public ArrayList<FieldInfo2> getFields()
-    {
-        return fields;
-    }
-    
-    public String getGlobal()
-    {
-        return global;
-    }
-    
-    public void setGlobal(String global)
-    {
-        this.global = global;
-    }
-    
-    public String getKeys()
-    {
-        return keys;
-    }
-    
-    public void setKeys()
-    {
-        this.keys = keys;
-    }
+	
+	public String getFileName()
+	{
+		return fileName;
+	}
+	public void setFileName(String fileName)
+	{
+		this.fileName = fileName;
+	}
+	
+	public String getPrimaryKeys()
+	{
+		return primaryKeys;
+	}
+	public void setPrimaryKeys(String primaryKeys)
+	{
+		this.primaryKeys = primaryKeys;
+	}
+	
+	public String getDescription()
+	{
+		return description;
+	}
+	public void setDescription(String description)
+	{
+		this.description = description;
+	}
+	
+	public String getGlobalName()
+	{
+		return globalName;
+	}
+	public void setGlobalName(String globalName)
+	{
+		this.globalName = globalName;
+	}
+	
+	public String getGlobalReference()
+	{
+		return globalReference;
+	}
+	public void setGlobalReference(String globalReference)
+	{
+		this.globalReference = globalReference;
+	}
+	
+	public String getDefaultDataItemList()
+	{
+		return defaultDataItemList;
+	}
+	public void setDefaultDataItemList(String defaultDataItemList)
+	{
+		this.defaultDataItemList = defaultDataItemList;
+	}
+	
+	public String getRequiredDataItemList()
+	{
+		return requiredDataItemList;
+	}
+	public void setRequiredDataItemList(String requiredDataItemList)
+	{
+		this.requiredDataItemList = requiredDataItemList;
+	}
+	
+	public String getLastUpdated()
+	{
+		return lastUpdated;
+	}
+	public void setLastUpdated(String lastUpdated)
+	{
+		this.lastUpdated = lastUpdated;
+	}
+	
+	public String getUserID()
+	{
+		return userID;
+	}
+	public void setUserID(String userID)
+	{
+		this.userID = userID;
+	}
+	
+	public ArrayList<FieldInfo> getFields()
+	{
+		return fields;
+	}
+	public void setFields(ArrayList<FieldInfo> fields)
+	{
+		this.fields = fields;
+	}
+	
+	public ArrayList<IndexInfo> getIndexes()
+	{
+		return indexes;
+	}
+	public void setIndexes()
+	{
+		this.indexes = indexes;
+	}
+	
+	public String getFileDocumentation()
+	{
+		return fileDocumentation;
+	}
+	public void setFileDocumentation(String fileDocumentation)
+	{
+		this.fileDocumentation = fileDocumentation;
+	}
 }

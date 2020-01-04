@@ -1,0 +1,32 @@
+version(1);
+
+project_name = "dba_swing";
+
+patterns = {
+"*.java",
+};
+
+blacklist_patterns = {
+".*",
+};
+
+load_paths = {
+ { {
+    {"src/dba"}
+    }, .os = "win" },
+};
+
+command_list = {
+ { .name = "run",
+   .out = "*run", .footer_panel = true, .save_dirty_files = false, .cursor_at_end = true,
+   .cmd = { {"ant", .os = "win" }, },
+ },
+ { .name = "compile",
+   .out = "*compilation", .footer_panel = true, .save_dirty_files = false, .cursor_at_end = true,
+   .cmd = { {"ant compile", .os = "win" }, },
+ },
+};
+
+fkey_command[1] = "compile";
+fkey_command[2] = "run";
+fkey_command[3] = "clean";

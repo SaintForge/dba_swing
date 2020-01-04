@@ -2,6 +2,8 @@ package dba;
 
 import java.util.ArrayList;
 
+import java.sql.*;
+
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
@@ -36,9 +38,24 @@ class MainFrame extends JFrame implements ChangeListener
         
         String data1[] = {"table1", "table2", "table3"};
         String data2[] = {"desc1", "desc2", "desc3"};
-        
-        SQLService sql = new SQLService();
-        ArrayList<TableInfo2> tableArray = sql.getData();
+		
+		ArrayList<TableInfo> tableArray = new ArrayList<TableInfo>();
+		
+		try
+		{
+			SQLService sql = new SQLService("172.29.7.82", "20101", "1", "xxx");
+			sql.connect();
+			sql.run_dba(tableArray, 4000, 10000);
+		}
+		catch(ClassNotFoundException exc)
+		{
+			
+		}
+		catch(SQLException exc)
+		{
+			
+		}
+		
         
         DBForm form = new DBForm(settings, this);
         form.populateData(tableArray);

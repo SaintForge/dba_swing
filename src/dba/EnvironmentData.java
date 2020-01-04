@@ -5,7 +5,7 @@ import java.util.ArrayList;
 class EnvironmentData
 {
 	SettingsData settings;
-	ArrayList<TableInfo2> tableArray;
+	ArrayList<TableInfo> tableArray;
 	
 	EnvironmentData(SettingsData settings) 
 	{
@@ -28,12 +28,12 @@ class EnvironmentData
 		this.settings = settings;
 	}
     
-    public ArrayList<TableInfo2> getTableArray()
+    public ArrayList<TableInfo> getTableArray()
     {
         return tableArray;
     }
     
-    public void setTableArray(ArrayList<TableInfo2> tableArray)
+    public void setTableArray(ArrayList<TableInfo> tableArray)
     {
         this.tableArray = tableArray;
     }
