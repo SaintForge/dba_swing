@@ -58,7 +58,7 @@ class Table extends JPanel
     }
     
     // populate data functions
-    public void populateTableProps(TableInfo tableInfo)
+    public void populateDataTableInfo(TableInfo tableInfo)
     {
         System.out.println("populateTableProps");
         
@@ -88,13 +88,10 @@ class Table extends JPanel
             tableInfo.getUserID()
         };
         
-        populateTable(tableProperties, tableData);
-        
-        //table.setModel(model);
-        //model.fireTableDataChanged();
+        populateDataStringArray(tableProperties, tableData);
     }
     
-    public void populateTableArray(ArrayList<TableInfo> tableArray)
+    public void populateDataTableArray(ArrayList<TableInfo> tableArray)
     {
         model.setRowCount(0);
         
@@ -109,7 +106,43 @@ class Table extends JPanel
         table.setModel(model);
         model.fireTableDataChanged();
     }
-    public void populateFieldArray(ArrayList<FieldInfo> fieldArray)
+	
+	public void populateDataFieldInfo(FieldInfo fieldInfo)
+	{
+		String fieldProperties[] =
+		{
+			"File Name",
+			"Data Item Name",
+			"Description",
+			"Required indicator",
+			"Maximum Field Length",
+			"Decimal Precision",
+			"Profile Data Type",
+			"Computed expression",
+			"Look-Up Table Name",
+			"Field Position",
+			"Subscript key"
+		};
+		
+		String fieldValues[] =
+		{
+			fieldInfo.getFileName(),
+			fieldInfo.getFieldName(),
+			fieldInfo.getDescription(),
+			fieldInfo.getRequiredIndicator(),
+			fieldInfo.getFieldLength(),
+			fieldInfo.getDecimalPrecision(),
+			fieldInfo.getDataType(),
+			fieldInfo.getComputedExpression(),
+			fieldInfo.getLookUpTable(),
+			fieldInfo.getFieldPosition(),
+			fieldInfo.getSubscriptKey()
+		};
+		
+		populateDataStringArray(fieldProperties, fieldValues);
+	}
+	
+    public void populateDataFieldArray(ArrayList<FieldInfo> fieldArray)
     {
         model.setRowCount(0);
         
@@ -125,7 +158,7 @@ class Table extends JPanel
         model.fireTableDataChanged();
     }
     
-    public void populateTable(String data[])
+    public void populateDataStringArray(String data[])
     {
         System.out.println("populateTable");
         model.setRowCount(0);
@@ -142,7 +175,7 @@ class Table extends JPanel
         model.fireTableDataChanged();
     }
     
-    public void populateTable(String data1[], String data2[])
+    public void populateDataStringArray(String data1[], String data2[])
     {
         model.setRowCount(0);
         

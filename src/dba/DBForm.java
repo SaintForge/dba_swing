@@ -71,10 +71,6 @@ class DBForm implements ActionListener, DocumentListener, MouseListener
         tableInfo.addTab("Index", new SplitPane());
         tableInfo.addTab("Table Documentation", new TextArea());
         
-        JTabbedPane tabs = tableInfo.getTabs();
-        Table tableProps = (Table)tabs.getComponentAt(0);
-        tableProps.populateTableProps(new TableInfo());
-        
         // initializing field list
         fieldList = new Table("Field Name", "Description");
         fieldList.getTable().addMouseListener(this);
@@ -130,7 +126,7 @@ class DBForm implements ActionListener, DocumentListener, MouseListener
     DBForm(SettingsData settings, JFrame frame, String data1[], String data2[])
     {
         this(settings, frame);
-        tableList.populateTable(data1, data2);
+        tableList.populateDataStringArray(data1, data2);
     }
     
     JPanel createNewTable(String firstName, String secondName)
@@ -171,7 +167,7 @@ class DBForm implements ActionListener, DocumentListener, MouseListener
 	public void populateData(ArrayList<TableInfo> tableArray)
     {
         data.setTableArray(tableArray);
-        tableList.populateTableArray(tableArray);
+        tableList.populateDataTableArray(tableArray);
     }
     
     // event handlers
@@ -243,46 +239,91 @@ class DBForm implements ActionListener, DocumentListener, MouseListener
             {
                 int rowIndex = tableList.getTable().getSelectedRow();
                 rowIndex = tableList.getTable().convertRowIndexToModel(rowIndex);
+				
+				System.out.println(rowIndex);
                 
                 if (rowIndex != -1)
                 {
                     if (rowIndex < data.getTableArray().size())
                     {
                         TableInfo tableInfoData = data.getTableArray().get(rowIndex);
-                        fieldList.populateFieldArray(tableInfoData.getFields());
-                        
-                        JTabbedPane tabs = tableInfo.getTabs();
-                        for (int tabIndex = 0; tabIndex < tabs.getTabCount(); ++tabIndex)
+                        fieldList.populateDataFieldArray(tableInfoData.getFields());
+						
+                        JTabbedPane tableTabs = tableInfo.getTabs();
+                        for (int tabIndex = 0; tabIndex < tableTabs.getTabCount(); ++tabIndex)
                         {
-                            //Component component = tabs.getTabComponentAt(tabIndex);
                             switch(tabIndex)
                             {
                                 case 0: // Table Properties
                                 {
-                                    Table tableProps = (Table)tabs.getComponentAt(tabIndex);
-                                    tableProps.populateTableProps(tableInfoData);
+                                    Table tableProps = (Table)tableTabs.getComponentAt(tabIndex);
+                                    tableProps.populateDataTableInfo(tableInfoData);
                                     
                                 } break;
                                 
                                 case 1: // Table Indexes
                                 {
-                                    
+									SplitPane indexPane = (SplitPane)tableTabs.getComponentAt(tabIndex);
+									indexPane.populateDataIndexArray(tableInfoData.getIndexes());
                                 } break;
                                 
                                 case 2: // Table Documentation
                                 {
-                                    
+									TextArea textPane = (TextArea)tableTabs.getComponentAt(tabIndex);
+									textPane.populateDataString(tableInfoData.getFileDocumentation());
                                 } break;
                             }
                         }
-                        
                     }
                 }
             }
         }
         else if (event.getSource() == fieldList.getTable())
         {
-            
+			if (SwingUtilities.isLeftMouseButton(event))
+			{
+				int rowIndex = tableList.getTable().getSelectedRow();
+                rowIndex = tableList.getTable().convertRowIndexToModel(rowIndex);
+				
+				System.out.println(rowIndex);
+				
+				if (rowIndex != -1)
+				{
+					if (rowIndex < data.getTableArray().size())
+					{
+						TableInfo tableInfoData = data.getTableArray().get(rowIndex);
+						
+						int rowFieldIndex = fieldList.getTable().getSelectedRow();
+						rowFieldIndex = fieldList.getTable().convertRowIndexToModel(rowFieldIndex);
+						
+						System.out.println(rowFieldIndex);
+						
+						if (rowFieldIndex != -1)
+						{
+							if (rowFieldIndex < tableInfoData.getFields().size())
+							{
+							JTabbedPane fieldTabs = fieldInfo.getTabs();
+							for (int tabIndex = 0; tabIndex < fieldTabs.getTabCount(); ++tabIndex)
+							{
+								switch(tabIndex)
+								{
+									case 0: // Column Properties
+									{
+										Table fieldProps = (Table)fieldTabs.getComponentAt(tabIndex);
+										fieldProps.populateDataFieldInfo(tableInfoData.getFields().get(rowFieldIndex));
+											
+									} break;
+									case 1: // Column Documentation
+									{
+										
+									} break;
+								}
+								}
+							}
+						}
+					}
+				}
+			}
         }
     }
     

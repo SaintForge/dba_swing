@@ -16,27 +16,6 @@ public class Main
 {
     public static void run()
     {
-        //try
-        {
-            //SQLService sql = new SQLService("172.29.7.82", "20101", "1", "xxx");
-            //sql.connect();
-            
-            //Vector<TableInfo> fid = new Vector<TableInfo>();
-            
-            //sql.run_dba(fid, 4000, 10000);
-            
-            System.out.println("completed.");
-        }
-        //catch(ClassNotFoundException exc)
-        {
-            
-        }
-        //catch(SQLException exc)
-        {
-            
-        }
-        
-        
         MainFrame main = new MainFrame();
     }
     

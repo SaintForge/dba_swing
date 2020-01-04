@@ -26,7 +26,6 @@ class SQLService
     public Connection connection = null;
     
     SQLService() {}
-    
     SQLService(String server_address, String server_port, 
                String username, String user_password)
 		throws NullPointerException
@@ -74,24 +73,7 @@ class SQLService
 		return(result);
 	}
     
-    public ArrayList<TableInfo> getData()
-    {
-        ArrayList<TableInfo> tables = new ArrayList<TableInfo>();
-        
-        tables.add(new TableInfo());
-        //tables.get(tables.size() - 1).insertRow("1field name1", "field desc1");
-        //tables.get(tables.size() - 1).insertRow("1field name2", "field desc2");
-        //tables.get(tables.size() - 1).insertRow("1field name3", "field desc3");
-        
-        tables.add(new TableInfo());
-        //tables.get(tables.size() - 1).insertRow("2field name1", "field desc1");
-        //tables.get(tables.size() - 1).insertRow("2field name2", "field desc2");
-        //tables.get(tables.size() - 1).insertRow("2field name3", "field desc3");
-        
-        return tables;
-    }
-	
-    public void run_dba(ArrayList<TableInfo> fid, int fid_fetch, int di_fetch) throws SQLException
+    public void run_dba(ArrayList<TableInfo> fid) throws SQLException
                         
 	{
         long time1      = System.currentTimeMillis();
@@ -102,7 +84,7 @@ class SQLService
 		
 		String sql = "SELECT FID, ACCKEYS, DES, GLREF, GLOBAL, LISTDFT, LISTREQ, LTD, USER FROM DBTBL1 ORDER BY FID";
         PreparedStatement prep = connection.prepareStatement(sql);
-        prep.setFetchSize(fid_fetch);
+        prep.setFetchSize(4000);
 		
         ResultSet rs_fid = prep.executeQuery();
 		while(rs_fid.next())
@@ -125,10 +107,10 @@ class SQLService
 		System.out.println("HashMap size: " + tableMap.size());
 		System.out.println("tbl_counter: " + fileIndex);
 		
-        sql = "SELECT FID, DI, NOD, POS, DES, TYP, LEN, DEC, REQ, TBL, CMP FROM DBTBL1D";
+        sql = "SELECT FID, DI, NOD, POS, DES, TYP, LEN, DEC, REQ, TBL, CMP FROM DBTBL1D" ;
         PreparedStatement prep1 = connection.prepareStatement(sql);
-        prep1.setFetchSize(di_fetch);
-        prep1.setMaxRows(35000);
+        prep1.setFetchSize(10000);
+        prep1.setMaxRows(40000);
 		
         ResultSet rs_di = prep1.executeQuery();
         while(rs_di.next())
@@ -188,7 +170,7 @@ class SQLService
 				fileIndex = tableMap.get(fileName);
 				
 				TableInfo tableInfo = fid.get(fileIndex);
-				String fileDocumentation = tableInfo.getFileDocumentation() + rsDocs.getString(2) + '\n';
+				String fileDocumentation = tableInfo.getFileDocumentation() + checkStringOrNull(rsDocs.getString(2)) + '\n';
 				tableInfo.setFileDocumentation(fileDocumentation);
 			}
 		}
@@ -201,4 +183,8 @@ class SQLService
         rs_di.close();
 	}
     
+	static String checkStringOrNull(String obj)
+	{
+		return (obj != null) ? obj : "";
+	}
 }

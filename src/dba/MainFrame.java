@@ -39,13 +39,13 @@ class MainFrame extends JFrame implements ChangeListener
         String data1[] = {"table1", "table2", "table3"};
         String data2[] = {"desc1", "desc2", "desc3"};
 		
-		ArrayList<TableInfo> tableArray = new ArrayList<TableInfo>();
 		
+		ArrayList<TableInfo> tableArray = new ArrayList<TableInfo>();
 		try
 		{
 			SQLService sql = new SQLService("172.29.7.82", "20101", "1", "xxx");
 			sql.connect();
-			sql.run_dba(tableArray, 4000, 10000);
+			sql.run_dba(tableArray);
 		}
 		catch(ClassNotFoundException exc)
 		{

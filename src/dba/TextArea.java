@@ -17,14 +17,13 @@ class TextArea extends JPanel
         
         textArea = new JTextArea();
         textArea.setEditable(false);
-        populateData("This is data.");
         
         scrollPane = new JScrollPane(textArea);
         
         add(scrollPane, BorderLayout.CENTER);
     }
     
-    public void populateData(String data)
+    public void populateDataString(String data)
     {
         textArea.setText(data);
     }
