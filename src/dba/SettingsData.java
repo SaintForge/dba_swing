@@ -2,11 +2,11 @@ package dba;
 
 public class SettingsData
 {
-	String name;
-	String sqlServer;
-	String mtmPort;
-	String profileUser;
-	String profilePassword;
+	private String name;
+	private String sqlServer;
+	private String mtmPort;
+	private String profileUser;
+	private String profilePassword;
 	
 	public String getName() {
 		return name;

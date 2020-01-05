@@ -2,6 +2,10 @@ package dba;
 
 import java.util.ArrayList;
 
+import com.esotericsoftware.kryo.Kryo;
+import com.esotericsoftware.kryo.io.Input;
+import com.esotericsoftware.kryo.io.Output;
+
 import javax.swing.JFrame; 
 import javax.swing.JLabel; 
 import javax.swing.JPanel; 
@@ -32,28 +36,36 @@ import java.awt.GridBagConstraints;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 
+import java.sql.SQLException;
+
 class DBForm implements ActionListener, DocumentListener, MouseListener
 {
-	JFrame frame;
-	EnvironmentData data;
+	private JFrame frame;
+	private EnvironmentData data;
     
-	JPanel panel = new JPanel(new GridBagLayout());
+	private JPanel panel = new JPanel(new GridBagLayout());
     
-    JTextField tableSearch;
-    TableRowSorter<TableModel> tableSorter;
+    private JTextField tableSearch;
+    private TableRowSorter<TableModel> tableSorter;
     
-    JTextField fieldSearch;
-    TableRowSorter<TableModel> fieldSorter;
+    private JTextField fieldSearch;
+    private TableRowSorter<TableModel> fieldSorter;
     
-    Table tableList;
-    TabbedTable tableInfo;
-    Table fieldList;
-    TabbedTable fieldInfo;
+    private Table tableList;
+    private TabbedTable tableInfo;
+    private Table fieldList;
+    private TabbedTable fieldInfo;
     
-	JButton refreshAllButton;
-	JButton settingsButton;
-	JButton refreshTableButton;
-    
+	private JButton refreshAllButton;
+	private JButton settingsButton;
+	private JButton refreshTableButton;
+	
+    DBForm(SettingsData settings, JFrame frame, String data1[], String data2[])
+    {
+        this(settings, frame);
+        tableList.populateDataStringArray(data1, data2);
+    }
+	
 	DBForm(SettingsData settings, JFrame frame)
 	{
 		this.frame = frame;
@@ -123,13 +135,7 @@ class DBForm implements ActionListener, DocumentListener, MouseListener
 		this.panel.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));
     }
     
-    DBForm(SettingsData settings, JFrame frame, String data1[], String data2[])
-    {
-        this(settings, frame);
-        tableList.populateDataStringArray(data1, data2);
-    }
-    
-    JPanel createNewTable(String firstName, String secondName)
+    public static JPanel createNewTable(String firstName, String secondName)
 	{
 		JPanel panel = new JPanel(new BorderLayout());
 		panel.setBorder(BorderFactory.createEtchedBorder());
@@ -156,14 +162,6 @@ class DBForm implements ActionListener, DocumentListener, MouseListener
 		return dbForm;
 	}
     
-    
-    public JPanel getPanel() {
-		return panel;
-	}
-	public void setPanel(JPanel panel) {
-		this.panel = panel;
-	}
-    
 	public void populateData(ArrayList<TableInfo> tableArray)
     {
         data.setTableArray(tableArray);
@@ -171,11 +169,43 @@ class DBForm implements ActionListener, DocumentListener, MouseListener
     }
     
     // event handlers
+	@Override
     public void actionPerformed(ActionEvent event) 
 	{
         if (event.getSource() == refreshAllButton) {
             
 			System.out.println("refreshAllButton");
+			
+			try 
+			{
+				SettingsData settings = data.getSettings();
+				
+				SQLService sql = new SQLService(settings.getSqlServer(), 
+												settings.getMtmPort(), 
+												settings.getProfileUser(),
+												settings.getProfilePassword());
+				
+				ArrayList<TableInfo> tableArray = new ArrayList<TableInfo>();
+				
+				sql.connect();
+				sql.run_dba(tableArray);
+				populateData(tableArray);
+				
+				Kryo kryo = new Kryo();
+				kryo.register(EnvironmentData.class);
+				
+
+			}
+			catch(ClassNotFoundException exc)
+			{
+				
+			}
+			
+			catch(SQLException exc)
+			{
+				
+			}
+			
 		}
 		if (event.getSource() == settingsButton) 
 		{
@@ -338,4 +368,11 @@ class DBForm implements ActionListener, DocumentListener, MouseListener
 	
 	@Override
 		public void mouseReleased(MouseEvent event) {}
+	
+    public JPanel getPanel() {
+		return panel;
+	}
+	public void setPanel(JPanel panel) {
+		this.panel = panel;
+	}
 }

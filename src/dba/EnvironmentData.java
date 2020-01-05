@@ -4,8 +4,8 @@ import java.util.ArrayList;
 
 class EnvironmentData
 {
-	SettingsData settings;
-	ArrayList<TableInfo> tableArray;
+	private SettingsData settings;
+	private ArrayList<TableInfo> tableArray;
 	
 	EnvironmentData(SettingsData settings) 
 	{

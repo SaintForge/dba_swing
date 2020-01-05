@@ -2,7 +2,7 @@ package dba;
 
 import java.util.ArrayList;
 
-import java.sql.*;
+import java.sql.SQLException;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -36,29 +36,8 @@ class MainFrame extends JFrame implements ChangeListener
         settings.setProfileUser("1");
         settings.setProfilePassword("xxx");
         
-        String data1[] = {"table1", "table2", "table3"};
-        String data2[] = {"desc1", "desc2", "desc3"};
-		
-		
-		ArrayList<TableInfo> tableArray = new ArrayList<TableInfo>();
-		try
-		{
-			SQLService sql = new SQLService("172.29.7.82", "20101", "1", "xxx");
-			sql.connect();
-			sql.run_dba(tableArray);
-		}
-		catch(ClassNotFoundException exc)
-		{
-			
-		}
-		catch(SQLException exc)
-		{
-			
-		}
-		
-        
         DBForm form = new DBForm(settings, this);
-        form.populateData(tableArray);
+        //form.populateData(tableArray);
         
         tabs.addTab(settings.getName(), null, form.getPanel(), null);
         tabs.setMnemonicAt(0, KeyEvent.VK_1);
@@ -103,7 +82,7 @@ class MainFrame extends JFrame implements ChangeListener
         
         SettingsData settings = openSettingsDialog();
         
-        if (settings.name == null || settings.name.isEmpty()) {
+        if (settings.getName() == null || settings.getName().isEmpty()) {
             if (pane.getTabCount() == 1) {
                 this.dispatchEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING));
             }
@@ -112,7 +91,7 @@ class MainFrame extends JFrame implements ChangeListener
             return;
         }
         
-        pane.addTab(settings.name, null, DBForm.createNewForm(settings, this).getPanel(), "new env");
+        pane.addTab(settings.getName(), null, DBForm.createNewForm(settings, this).getPanel(), "new env");
         
         
         pane.addTab(" + ", null, new JPanel(), null);
