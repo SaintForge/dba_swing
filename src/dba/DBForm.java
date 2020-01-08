@@ -1,6 +1,8 @@
 package dba;
 
 import java.util.ArrayList;
+import java.io.FileOutputStream;
+import java.io.FileNotFoundException;
 
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
@@ -38,12 +40,12 @@ import java.awt.event.ActionEvent;
 
 import java.sql.SQLException;
 
-class DBForm implements ActionListener, DocumentListener, MouseListener
+class DBForm extends JPanel implements ActionListener, DocumentListener, MouseListener
 {
 	private JFrame frame;
-	private EnvironmentData data;
+	private EnvironmentData environmentData;
     
-	private JPanel panel = new JPanel(new GridBagLayout());
+	//private JPanel panel = new JPanel(new GridBagLayout());
     
     private JTextField tableSearch;
     private TableRowSorter<TableModel> tableSorter;
@@ -60,18 +62,21 @@ class DBForm implements ActionListener, DocumentListener, MouseListener
 	private JButton settingsButton;
 	private JButton refreshTableButton;
 	
-    DBForm(SettingsData settings, JFrame frame, String data1[], String data2[])
+    DBForm(EnvironmentData environmentData, JFrame frame, String data1[], String data2[])
     {
-        this(settings, frame);
+        this(environmentData, frame);
         tableList.populateDataStringArray(data1, data2);
     }
 	
-	DBForm(SettingsData settings, JFrame frame)
+	DBForm(EnvironmentData environmentData, JFrame frame)
 	{
+		setLayout(new GridBagLayout());
 		this.frame = frame;
         
         // initializing basic data settings
-		data = new EnvironmentData(settings);
+		this.environmentData = environmentData;
+		
+		System.out.println("hello vietnam");
         
         // initializing table list
 		tableList = new Table("Table Name", "Description");
@@ -109,6 +114,8 @@ class DBForm implements ActionListener, DocumentListener, MouseListener
         tableSorter = new TableRowSorter<TableModel>(tableList.getModel());
         tableSearch.getDocument().addDocumentListener(this);
         tableList.setRowSorter(tableSorter);
+		
+		populateData(environmentData.getTableArray());
         
         // initializing texfield for field list
         fieldSearch = new JTextField();
@@ -117,54 +124,27 @@ class DBForm implements ActionListener, DocumentListener, MouseListener
         fieldList.setRowSorter(fieldSorter);
         
         // initializing all objects's layouts
-		this.panel.add(tableSearch,  new GridBagConstraints(0, 0, 1, 1, 1.0, 0.01, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(2, 2, 2, 2), 100, 0));
-		this.panel.add(refreshAllButton,  new GridBagConstraints(2, 0, 1, 1, 1.0, 0.01, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(2, 2, 2, 80), 0, 0));
-		this.panel.add(settingsButton,  new GridBagConstraints(2, 0, 1, 1, 1.0, 0.01, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(2, 2, 2, 2), 0, 0));
+		add(tableSearch,  new GridBagConstraints(0, 0, 1, 1, 1.0, 0.01, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(2, 2, 2, 2), 100, 0));
+		add(refreshAllButton,  new GridBagConstraints(2, 0, 1, 1, 1.0, 0.01, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(2, 2, 2, 80), 0, 0));
+		add(settingsButton,  new GridBagConstraints(2, 0, 1, 1, 1.0, 0.01, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(2, 2, 2, 2), 0, 0));
 		
-		this.panel.add(fieldSearch,  new GridBagConstraints(3, 0, 1, 1, 1.0, 0.01, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(2, 2, 2, 2), 100, 0));
-		this.panel.add(new JLabel(""),  new GridBagConstraints(5, 0, 1, 1, 1.0, 0.01, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(2, 2, 2, 140), 0, 0));
-		this.panel.add(refreshTableButton,  new GridBagConstraints(5, 0, 2, 1, 1.0, 0.01, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(2, 2, 2, 2), 0, 0));
+		add(fieldSearch,  new GridBagConstraints(3, 0, 1, 1, 1.0, 0.01, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(2, 2, 2, 2), 100, 0));
+		add(new JLabel(""),  new GridBagConstraints(5, 0, 1, 1, 1.0, 0.01, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(2, 2, 2, 140), 0, 0));
+		add(refreshTableButton,  new GridBagConstraints(5, 0, 2, 1, 1.0, 0.01, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(2, 2, 2, 2), 0, 0));
 		
-		this.panel.add(tableList,  new GridBagConstraints(0, 1, 3, 1, 1.0, 0.7, GridBagConstraints.WEST, GridBagConstraints.BOTH, new Insets(2, 2, 2, 2), 0, 0));
+		add(tableList,  new GridBagConstraints(0, 1, 3, 1, 1.0, 0.7, GridBagConstraints.WEST, GridBagConstraints.BOTH, new Insets(2, 2, 2, 2), 0, 0));
         
-        this.panel.add(tableInfo, new GridBagConstraints(0, 2, 3, 1, 1.0, 0.4, GridBagConstraints.WEST, GridBagConstraints.BOTH, new Insets(2, 2, 2, 2), 0, 0));
-		this.panel.add(fieldList,  new GridBagConstraints(3, 1, 3, 1, 1.0, 0.7, GridBagConstraints.WEST, GridBagConstraints.BOTH, new Insets(2, 2, 2, 2), 0, 0));
-		this.panel.add(fieldInfo,  new GridBagConstraints(3, 2, 3, 1, 1.0, 0.4, GridBagConstraints.WEST, GridBagConstraints.BOTH, new Insets(2, 2, 2, 2), 0, 0));
+        add(tableInfo, new GridBagConstraints(0, 2, 3, 1, 1.0, 0.4, GridBagConstraints.WEST, GridBagConstraints.BOTH, new Insets(2, 2, 2, 2), 0, 0));
+		add(fieldList,  new GridBagConstraints(3, 1, 3, 1, 1.0, 0.7, GridBagConstraints.WEST, GridBagConstraints.BOTH, new Insets(2, 2, 2, 2), 0, 0));
+		add(fieldInfo,  new GridBagConstraints(3, 2, 3, 1, 1.0, 0.4, GridBagConstraints.WEST, GridBagConstraints.BOTH, new Insets(2, 2, 2, 2), 0, 0));
 		
         // setting border
-		this.panel.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));
+		setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));
     }
     
-    public static JPanel createNewTable(String firstName, String secondName)
-	{
-		JPanel panel = new JPanel(new BorderLayout());
-		panel.setBorder(BorderFactory.createEtchedBorder());
-		
-		DefaultTableModel tableModel = new DefaultTableModel();
-		tableModel.addColumn(firstName);
-		tableModel.addColumn(secondName);
-		
-		JTable table = new JTable(tableModel);
-		table.setPreferredScrollableViewportSize(table.getPreferredSize());
-		table.setFillsViewportHeight(true);
-		table.setFont(new Font("Courier New", Font.PLAIN, 14));
-		table.setShowVerticalLines(true);
-		JScrollPane scrollTable = new JScrollPane(table);
-		
-		panel.add(scrollTable, BorderLayout.CENTER);
-		
-		return panel;
-	}
-    
-    public static DBForm createNewForm(SettingsData settings, JFrame frame)
-	{
-		DBForm dbForm = new DBForm(settings, frame);
-		return dbForm;
-	}
-    
 	public void populateData(ArrayList<TableInfo> tableArray)
-    {
-        data.setTableArray(tableArray);
+	{
+        environmentData.setTableArray(tableArray);
         tableList.populateDataTableArray(tableArray);
     }
     
@@ -174,11 +154,9 @@ class DBForm implements ActionListener, DocumentListener, MouseListener
 	{
         if (event.getSource() == refreshAllButton) {
             
-			System.out.println("refreshAllButton");
-			
 			try 
 			{
-				SettingsData settings = data.getSettings();
+				SettingsData settings = environmentData.getSettings();
 				
 				SQLService sql = new SQLService(settings.getSqlServer(), 
 												settings.getMtmPort(), 
@@ -188,13 +166,14 @@ class DBForm implements ActionListener, DocumentListener, MouseListener
 				ArrayList<TableInfo> tableArray = new ArrayList<TableInfo>();
 				
 				sql.connect();
-				sql.run_dba(tableArray);
-				populateData(tableArray);
-				
-				Kryo kryo = new Kryo();
-				kryo.register(EnvironmentData.class);
-				
-
+				if (sql.isConnected())
+				{
+					sql.run_dba(tableArray);
+					environmentData.setTableArray(tableArray);
+					tableList.populateDataTableArray(tableArray);
+					
+					GlobalData.writeToFile();
+				}
 			}
 			catch(ClassNotFoundException exc)
 			{
@@ -209,10 +188,10 @@ class DBForm implements ActionListener, DocumentListener, MouseListener
 		}
 		if (event.getSource() == settingsButton) 
 		{
-			System.out.println("settingsButton");
+            SettingsData newSettings = SettingsDialog.updateNewDialog(frame, environmentData.getSettings());
+			environmentData.setSettings(newSettings);
 			
-            SettingsData newSettings = SettingsDialog.updateNewDialog(frame, data.getSettings());
-			data.setSettings(newSettings);
+			GlobalData.writeToFile();
 		}
 	}
     
@@ -268,15 +247,14 @@ class DBForm implements ActionListener, DocumentListener, MouseListener
             if (SwingUtilities.isLeftMouseButton(event))
             {
                 int rowIndex = tableList.getTable().getSelectedRow();
-                rowIndex = tableList.getTable().convertRowIndexToModel(rowIndex);
-				
-				System.out.println(rowIndex);
                 
                 if (rowIndex != -1)
                 {
-                    if (rowIndex < data.getTableArray().size())
+					rowIndex = tableList.getTable().convertRowIndexToModel(rowIndex);
+					
+                    if (rowIndex < environmentData.getTableArray().size())
                     {
-                        TableInfo tableInfoData = data.getTableArray().get(rowIndex);
+                        TableInfo tableInfoData = environmentData.getTableArray().get(rowIndex);
                         fieldList.populateDataFieldArray(tableInfoData.getFields());
 						
                         JTabbedPane tableTabs = tableInfo.getTabs();
@@ -313,15 +291,14 @@ class DBForm implements ActionListener, DocumentListener, MouseListener
 			if (SwingUtilities.isLeftMouseButton(event))
 			{
 				int rowIndex = tableList.getTable().getSelectedRow();
-                rowIndex = tableList.getTable().convertRowIndexToModel(rowIndex);
-				
-				System.out.println(rowIndex);
 				
 				if (rowIndex != -1)
 				{
-					if (rowIndex < data.getTableArray().size())
+					rowIndex = tableList.getTable().convertRowIndexToModel(rowIndex);
+					
+					if (rowIndex < environmentData.getTableArray().size())
 					{
-						TableInfo tableInfoData = data.getTableArray().get(rowIndex);
+						TableInfo tableInfoData = environmentData.getTableArray().get(rowIndex);
 						
 						int rowFieldIndex = fieldList.getTable().getSelectedRow();
 						rowFieldIndex = fieldList.getTable().convertRowIndexToModel(rowFieldIndex);
@@ -368,11 +345,4 @@ class DBForm implements ActionListener, DocumentListener, MouseListener
 	
 	@Override
 		public void mouseReleased(MouseEvent event) {}
-	
-    public JPanel getPanel() {
-		return panel;
-	}
-	public void setPanel(JPanel panel) {
-		this.panel = panel;
-	}
 }

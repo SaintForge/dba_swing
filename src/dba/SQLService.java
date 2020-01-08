@@ -23,7 +23,7 @@ class SQLService
     String port;
 	String url;
 	
-    public Connection connection = null;
+     private Connection connection;
     
     SQLService() {}
     SQLService(String server_address, String server_port, 
@@ -38,8 +38,7 @@ class SQLService
 		this.url = "protocol=jdbc:sanchez/database="+ server_address + ":" + server_port + ":SCA$IBS/locale=US:ENGLISH/timeOut=2/transType=MTM/rowPrefetch=3000/signOnType=1/fileEncoding=UTF-8";
     }
 	
-	public void connect() 
-		throws ClassNotFoundException, SQLException
+	public void connect() throws ClassNotFoundException, SQLException
 	{
 		Class.forName(driver_name);
         
@@ -186,5 +185,10 @@ class SQLService
 	static String checkStringOrNull(String obj)
 	{
 		return (obj != null) ? obj : "";
+	}
+	
+	public boolean isConnected()
+	{
+		return connection == null ? false : true;
 	}
 }

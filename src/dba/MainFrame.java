@@ -1,5 +1,6 @@
 package dba;
 
+import java.util.HashMap;
 import java.util.ArrayList;
 
 import java.sql.SQLException;
@@ -27,37 +28,20 @@ class MainFrame extends JFrame implements ChangeListener
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         
         tabs = new JTabbedPane(JTabbedPane.TOP);
-        tabs.setTabLayoutPolicy(JTabbedPane.WRAP_TAB_LAYOUT);
         
-        SettingsData settings = new SettingsData();
-        settings.setName("vtbdevnew");
-        settings.setSqlServer("172.29.7.82");
-        settings.setMtmPort("20101");
-        settings.setProfileUser("1");
-        settings.setProfilePassword("xxx");
-        
-        DBForm form = new DBForm(settings, this);
-        //form.populateData(tableArray);
-        
-        tabs.addTab(settings.getName(), null, form.getPanel(), null);
-        tabs.setMnemonicAt(0, KeyEvent.VK_1);
-        
-        tabs.setTabComponentAt(0, new ButtonTabComponent(tabs));
-        
-        settings.setName("vtbCR810bqa");
-        settings.setSqlServer("172.29.7.82");
-        settings.setMtmPort("19275");
-        settings.setProfileUser("1");
-        settings.setProfilePassword("xxx");
-        
-        tabs.addTab(settings.getName(), null, DBForm.createNewForm(settings, this).getPanel(), null);
-        tabs.setMnemonicAt(1, KeyEvent.VK_2);
-        tabs.setTabComponentAt(1, new ButtonTabComponent(tabs));
-        
+		GlobalData.readFromFile();
+		  ArrayList<EnvironmentData> dataList = GlobalData.getInstance().data;
+		
+		for (int i = 0; i < dataList.size(); ++i) {
+			EnvironmentData data = dataList.get(i);
+			
+			DBForm form = new DBForm(data, this);
+				tabs.addTab(data.getSettings().getName(), null, form, null);
+			tabs.setTabComponentAt(0, new ButtonTabComponent(tabs));
+		}
+		
         tabs.addTab(" + ", null, new JPanel(), null);
-        
         tabs.addChangeListener(this);
-        
         tabs.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
         
         JPanel tab_panel = new JPanel(new GridLayout(1, 1));
@@ -90,9 +74,26 @@ class MainFrame extends JFrame implements ChangeListener
             pane.setSelectedIndex(pane.getSelectedIndex()-1);
             return;
         }
-        
-        pane.addTab(settings.getName(), null, DBForm.createNewForm(settings, this).getPanel(), "new env");
-        
+		else
+		{
+			ArrayList<EnvironmentData> dataList = GlobalData.getInstance().data;
+			for (int i = 0; i < dataList.size(); i += 1)
+			{
+				SettingsData settingsData = dataList.get(i).getSettings();
+				if (settingsData.getName().equals(settings.getName()))
+				{
+					pane.setSelectedIndex(pane.getSelectedIndex()-1);
+					return;
+				}
+			}
+		}
+		
+		EnvironmentData environmenData = new EnvironmentData(settings);
+        pane.addTab(settings.getName(), null, new DBForm(environmenData, this), null);
+		
+		GlobalData.getInstance().data.add(environmenData);
+		GlobalData.writeToFile();
+		
         
         pane.addTab(" + ", null, new JPanel(), null);
         pane.setSelectedIndex(pane.getTabCount() - 2);

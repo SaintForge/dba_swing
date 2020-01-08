@@ -1,12 +1,25 @@
 package dba;
 
-public class SettingsData
+import java.io.Serializable;
+
+public class SettingsData implements Serializable
 {
 	private String name;
 	private String sqlServer;
 	private String mtmPort;
 	private String profileUser;
 	private String profilePassword;
+	
+	public SettingsData() {}
+	
+	public SettingsData(String name, String sqlServer, String mtmPort, String profileUser, String profilePassword)
+	{
+		this.name = name;
+		this.sqlServer = sqlServer;
+		this.mtmPort = mtmPort;
+		this.profileUser = profileUser;
+		this.profilePassword = profilePassword;
+	}
 	
 	public String getName() {
 		return name;
