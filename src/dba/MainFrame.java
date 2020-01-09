@@ -7,6 +7,7 @@ import java.sql.SQLException;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.JLabel;
 import javax.swing.JTabbedPane;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ChangeEvent;
@@ -15,6 +16,7 @@ import java.awt.event.WindowEvent;
 import java.awt.Dimension;
 import java.awt.event.KeyEvent;
 import java.awt.GridLayout;
+import java.awt.Font;
 
 class MainFrame extends JFrame implements ChangeListener
 {
@@ -28,6 +30,7 @@ class MainFrame extends JFrame implements ChangeListener
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         
         tabs = new JTabbedPane(JTabbedPane.TOP);
+		tabs.setFont( new Font( "Courier New", Font.BOLD, 12));
         
 		GlobalData.readFromFile();
 		  ArrayList<EnvironmentData> dataList = GlobalData.getInstance().data;
@@ -36,8 +39,8 @@ class MainFrame extends JFrame implements ChangeListener
 			EnvironmentData data = dataList.get(i);
 			
 			DBForm form = new DBForm(data, this);
-				tabs.addTab(data.getSettings().getName(), null, form, null);
-			tabs.setTabComponentAt(0, new ButtonTabComponent(tabs));
+			tabs.addTab(data.getSettings().getName(), null, form, null);
+			tabs.setTabComponentAt(i, new ButtonTabComponent(tabs));
 		}
 		
         tabs.addTab(" + ", null, new JPanel(), null);
@@ -93,7 +96,6 @@ class MainFrame extends JFrame implements ChangeListener
 		
 		GlobalData.getInstance().data.add(environmenData);
 		GlobalData.writeToFile();
-		
         
         pane.addTab(" + ", null, new JPanel(), null);
         pane.setSelectedIndex(pane.getTabCount() - 2);

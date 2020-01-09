@@ -76,8 +76,6 @@ class DBForm extends JPanel implements ActionListener, DocumentListener, MouseLi
         // initializing basic data settings
 		this.environmentData = environmentData;
 		
-		System.out.println("hello vietnam");
-        
         // initializing table list
 		tableList = new Table("Table Name", "Description");
         tableList.getTable().addMouseListener(this);
@@ -150,7 +148,7 @@ class DBForm extends JPanel implements ActionListener, DocumentListener, MouseLi
     
     // event handlers
 	@Override
-    public void actionPerformed(ActionEvent event) 
+		public void actionPerformed(ActionEvent event) 
 	{
         if (event.getSource() == refreshAllButton) {
             
@@ -179,19 +177,62 @@ class DBForm extends JPanel implements ActionListener, DocumentListener, MouseLi
 			{
 				
 			}
-			
 			catch(SQLException exc)
 			{
 				
 			}
 			
 		}
-		if (event.getSource() == settingsButton) 
+		else if (event.getSource() == settingsButton) 
 		{
             SettingsData newSettings = SettingsDialog.updateNewDialog(frame, environmentData.getSettings());
 			environmentData.setSettings(newSettings);
 			
 			GlobalData.writeToFile();
+		}
+		else if (event.getSource() == refreshTableButton)
+		{
+			int rawRowIndex = tableList.getTable().getSelectedRow();
+			if (rawRowIndex != -1)
+			{
+				int rowIndex = tableList.getTable().convertRowIndexToModel(rawRowIndex);
+				
+				try 
+				{
+					SettingsData settings = environmentData.getSettings();
+					
+					SQLService sql = new SQLService(settings.getSqlServer(), 
+													settings.getMtmPort(), 
+													settings.getProfileUser(),
+													settings.getProfilePassword());
+					
+					sql.connect();
+					if (sql.isConnected())
+					{
+						TableInfo tableInfoDataOld = environmentData.getTableArray().get(rowIndex);
+						TableInfo tableInfoDataNew = sql.run_query(tableInfoDataOld.getFileName(),
+																   tableInfoDataOld.getFields().size(),
+																   tableInfoDataOld.getIndexes().size());
+						environmentData.getTableArray().set(rowIndex, tableInfoDataNew);
+						
+						tableList.populateDataTableArray(environmentData.getTableArray());
+						fieldList.populateDataFieldArray(tableInfoDataNew.getFields());
+						tableList.selectRow(rawRowIndex);
+						
+						GlobalData.writeToFile();
+					}
+				}
+				catch(ClassNotFoundException exc)
+				{
+					
+				}
+				catch(SQLException exc)
+				{
+					
+				}
+			}
+			
+			
 		}
 	}
     
@@ -240,7 +281,7 @@ class DBForm extends JPanel implements ActionListener, DocumentListener, MouseLi
     }
     
     @Override
-        public void mouseClicked(MouseEvent event)
+        public void mousePressed(MouseEvent event)
     {
         if (event.getSource() == tableList.getTable())
         {
@@ -301,12 +342,11 @@ class DBForm extends JPanel implements ActionListener, DocumentListener, MouseLi
 						TableInfo tableInfoData = environmentData.getTableArray().get(rowIndex);
 						
 						int rowFieldIndex = fieldList.getTable().getSelectedRow();
-						rowFieldIndex = fieldList.getTable().convertRowIndexToModel(rowFieldIndex);
-						
-						System.out.println(rowFieldIndex);
 						
 						if (rowFieldIndex != -1)
 						{
+							rowIndex = fieldList.getTable().convertRowIndexToModel(rowFieldIndex);
+							
 							if (rowFieldIndex < tableInfoData.getFields().size())
 							{
 							JTabbedPane fieldTabs = fieldInfo.getTabs();
@@ -341,7 +381,7 @@ class DBForm extends JPanel implements ActionListener, DocumentListener, MouseLi
 		public void mouseEntered(MouseEvent event) {}
 	
 	@Override
-		public void mousePressed(MouseEvent event) {}
+		public void mouseClicked(MouseEvent event) {}
 	
 	@Override
 		public void mouseReleased(MouseEvent event) {}

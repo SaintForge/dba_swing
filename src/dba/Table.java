@@ -32,9 +32,10 @@ class Table extends JPanel
 		table.setFillsViewportHeight(true);
 		table.setFont(new Font("Courier New", Font.PLAIN, 14));
 		table.setShowVerticalLines(true);
+		table.setDefaultEditor(Object.class, null);
+		table.getTableHeader().setReorderingAllowed(false);
         
         scrollPane = new JScrollPane(table);
-		
 		add(scrollPane, BorderLayout.CENTER);
     }
     
@@ -51,11 +52,18 @@ class Table extends JPanel
         table.setFillsViewportHeight(true);
 		table.setFont(new Font("Courier New", Font.PLAIN, 14));
 		table.setShowVerticalLines(true);
+		table.setDefaultEditor(Object.class, null);
+		table.getTableHeader().setReorderingAllowed(false);
         
         scrollPane = new JScrollPane(table);
 		
 		add(scrollPane, BorderLayout.CENTER);
     }
+	
+	public void selectRow(int rowIndex)
+	{
+		table.setRowSelectionInterval(rowIndex, rowIndex);
+	}
     
     // populate data functions
     public void populateDataTableInfo(TableInfo tableInfo)

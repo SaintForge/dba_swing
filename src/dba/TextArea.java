@@ -5,6 +5,7 @@ import javax.swing.JTextArea;
 import javax.swing.JScrollPane;
 
 import java.awt.BorderLayout;
+import java.awt.Font;
 
 class TextArea extends JPanel
 {
@@ -17,6 +18,7 @@ class TextArea extends JPanel
         
         textArea = new JTextArea();
         textArea.setEditable(false);
+		textArea.setFont( new Font( "Courier New", Font.PLAIN, 12));
         
         scrollPane = new JScrollPane(textArea);
         

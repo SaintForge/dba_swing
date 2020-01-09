@@ -13,10 +13,6 @@ public class ButtonTabComponent extends JPanel {
     {
         //unset default FlowLayout' gaps
         super(new FlowLayout(FlowLayout.LEFT, 0, 0));
-        if (pane == null) 
-        {
-            throw new NullPointerException("TabbedPane is null");
-        }
         this.pane = pane;
         setOpaque(false);
         
@@ -33,6 +29,8 @@ public class ButtonTabComponent extends JPanel {
                 return null;
             }
         };
+		
+		label.setFont(new Font( "Courier New", Font.PLAIN, 12));
         
         add(label);
         //add more space between the label and the button
@@ -75,6 +73,9 @@ public class ButtonTabComponent extends JPanel {
             {
                 pane.remove(i);
                 pane.setSelectedIndex(0);
+				
+				GlobalData.getInstance().data.remove(i);
+				GlobalData.writeToFile();
             }
         }
         

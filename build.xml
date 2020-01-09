@@ -1,6 +1,7 @@
 <project name="Profile_DBA" basedir="." default="main">
 
     <property name="src.dir"     value="src"/>
+    <property name="bin.dir"     value=""/>
     <property name="build.dir"   value="build"/>
 	<property name="lib.dir"     value="lib"/>
     <property name="classes.dir" value="${build.dir}/classes"/>
@@ -30,6 +31,9 @@
                 <attribute name="Main-Class" value="${main-class}"/>
             </manifest>
 			<zipgroupfileset dir="${lib.dir}" includes="**/*.jar" />
+			<zipfileset dir="${bin.dir}" 
+	                includes="package1.bin"
+    	            fullpath="dba_swing/package1.bin"/>
         </jar>
     </target>
 

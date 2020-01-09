@@ -17,11 +17,11 @@ class SQLService
     private static String driver_name = 
 		"sanchez.jdbc.driver.ScDriver";
 	
-    String address;
-    String username;
-    String password;
-    String port;
-	String url;
+    private String address;
+    private String username;
+    private String password;
+    private String port;
+	private String url;
 	
      private Connection connection;
     
@@ -49,29 +49,83 @@ class SQLService
 		System.out.print("Connected.\n");
 	}
 	
-	public ResultSet run_query(String sql, int fetch_size) 
-		throws SQLException
+	public TableInfo run_query(String fileName, int fieldAmount, int indexAmount) throws SQLException
 	{
-		ResultSet result = null;
-		
-		if(connection != null)
-		{
-			Statement stmt = this.connection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-            
-            // stmt.setMaxRows(35000);
-			stmt.setFetchSize(fetch_size);
+			ResultSet result = null;
+			String sql = "SELECT FID, ACCKEYS, DES, GLREF, GLOBAL, LISTDFT, LISTREQ, LTD, USER FROM DBTBL1 WHERE FID = '" 
+			+ fileName + "'";
 			
-			if (sql.toLowerCase().startsWith("select"))
+			PreparedStatement prep = connection.prepareStatement(sql);
+		
+		TableInfo tableInfo = new TableInfo();
+		
+			ResultSet rsFid = prep.executeQuery();
+			if (rsFid.next())
 			{
-				System.out.println("Executing query");
-				result = stmt.executeQuery(sql);
-                //result = stmt.getResultSet();
+				 tableInfo = new TableInfo(fileName,              // File Name
+									  rsFid.getString(2),   // Primary Keys
+									  rsFid.getString(3),   // Description
+									  rsFid.getString(4),   // Global Name
+									  rsFid.getString(5),   // Global Reference
+									  rsFid.getString(6),   // Default Data Item List
+									  rsFid.getString(7),   // Required Data Item List
+									  rsFid.getString(8),   // Last Updated
+										  rsFid.getString(9));  // User ID
 			}
+			
+			sql = "SELECT FID, DI, NOD, POS, DES, TYP, LEN, DEC, REQ, TBL, CMP FROM DBTBL1D WHERE FID = '" + tableInfo.getFileName() + "'";
+			
+			prep = connection.prepareStatement(sql);
+			prep.setFetchSize(fieldAmount + 50);
+			prep.setMaxRows(40000);
+			
+			ResultSet rsDi = prep.executeQuery();
+			while(rsDi.next())
+			{
+			tableInfo.getFields().add(new FieldInfo(fileName,              // File Name
+										 rsDi.getString(2),    // Field Name
+										 rsDi.getString(3),    // Subscript Key
+										 rsDi.getString(4),    // Field Position
+										 rsDi.getString(5),    // Description
+										 rsDi.getString(6),    // Data Type
+										 rsDi.getString(7),    // Field Length
+										 rsDi.getString(8),    // Decimal Precision
+										 rsDi.getString(9),    // Required Indicator
+										 rsDi.getString(10),   // Look-Up Table
+													   rsDi.getString(11))); // Computed Expression
 		}
 		
-		return(result);
+		sql = "SELECT FID, INDEXNM, GLOBAL, ORDERBY, IDXDESC, UPCASE, PARFID FROM DBTBL8 WHERE FID = '" + fileName + "'";
+		PreparedStatement prep2 = connection.prepareStatement(sql);
+		prep2.setFetchSize(indexAmount + 5);
+		
+		ResultSet rsIndex = prep2.executeQuery();
+		while(rsIndex.next())
+		{
+			tableInfo.getIndexes().add(new IndexInfo(rsIndex.getString(2),   // Index Name
+													 rsIndex.getString(3),   // Global Name
+													 rsIndex.getString(4),   // Order by
+													 rsIndex.getString(5),   // Index Description
+													 rsIndex.getString(6),   // Convert To Upper Case
+													 rsIndex.getString(7))); // Super Type File Name
+		}
+		
+		sql = "SELECT FID, DES FROM DBTBL1TBLDOC";
+		PreparedStatement prep3 = connection.prepareStatement(sql);
+		prep3.setFetchSize(7000);
+		
+		ResultSet rsDocs = prep3.executeQuery();
+		while(rsDocs.next())
+		{
+			fileName = rsDocs.getString(1);
+			
+			String fileDocumentation = tableInfo.getFileDocumentation() + checkStringOrNull(rsDocs.getString(2)) + '\n';
+			tableInfo.setFileDocumentation(fileDocumentation);
+		}
+		
+		return (tableInfo);
 	}
-    
+	
     public void run_dba(ArrayList<TableInfo> fid) throws SQLException
                         
 	{
@@ -102,9 +156,6 @@ class SQLService
             
 			tableMap.put(fileName, fileIndex++);
 		}
-		
-		System.out.println("HashMap size: " + tableMap.size());
-		System.out.println("tbl_counter: " + fileIndex);
 		
         sql = "SELECT FID, DI, NOD, POS, DES, TYP, LEN, DEC, REQ, TBL, CMP FROM DBTBL1D" ;
         PreparedStatement prep1 = connection.prepareStatement(sql);
@@ -190,5 +241,50 @@ class SQLService
 	public boolean isConnected()
 	{
 		return connection == null ? false : true;
+	}
+	
+	public String getAddress()
+	{
+		return address;
+	}
+	public void setAddress(String address)
+	{
+		this.address = address;
+	}
+	
+	public String getUsername()
+	{
+		return username;
+	}
+	public void setUsername(String username)
+	{
+		this.username = username;
+	}
+	
+	public String getPassword()
+	{
+		return password;
+	}
+	public void setPassword(String password)
+	{
+		this.password = password;
+	}
+	
+	public String getPort()
+	{
+		return port;
+	}
+	public void setPort(String port)
+	{
+		this.port = port;
+	}
+	
+	public String getUrl()
+	{
+		return url;
+	}
+	public void setUrl(String url)
+	{
+		this.url = url;
 	}
 }

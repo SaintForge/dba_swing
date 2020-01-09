@@ -33,7 +33,7 @@ class SplitPane extends JPanel implements MouseListener
         add(splitPane, BorderLayout.CENTER);
     }
     
-    public void mouseClicked(MouseEvent event) 
+    public void mousePressed(MouseEvent event) 
     {
         if (event.getSource() == selectTable.getTable()) 
         {
@@ -78,6 +78,6 @@ class SplitPane extends JPanel implements MouseListener
 	
     public void mouseExited(MouseEvent event) {}
 	public void mouseEntered(MouseEvent event) {}
-	public void mousePressed(MouseEvent event) {}
+	public void mouseClicked(MouseEvent event) {}
 	public void mouseReleased(MouseEvent event) {} 
 }

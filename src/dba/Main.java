@@ -1,14 +1,5 @@
 package dba;
 
-import java.sql.*;
-
-import java.util.Vector;
-
-import sanchez.jdbc.driver.ScDriver;
-import com.esotericsoftware.kryo.Kryo;
-import com.esotericsoftware.kryo.io.Input;
-import com.esotericsoftware.kryo.io.Output;
-
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 

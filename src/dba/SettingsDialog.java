@@ -14,6 +14,7 @@ import java.awt.Container;
 import java.awt.Rectangle;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import java.awt.Font;
 
 class SettingsDialog extends JDialog
 {
@@ -39,6 +40,7 @@ class SettingsDialog extends JDialog
 		
 		Component comp = new JTextField();
 		comp.setName(labelName.substring(0, labelName.length()));
+		comp.setFont( new Font( "Courier New", Font.BOLD, 12));
 		
 		this.panel.add(comp);
 		this.springLayout.putConstraint("West", comp, 120, "West", this.panel);

@@ -16,7 +16,7 @@ class TableInfo implements Serializable
 	private String lastUpdated;
 	private String userID;
 	
-	private String fileDocumentation;
+	private String fileDocumentation = "";
 	
 	private ArrayList<FieldInfo> fields = new ArrayList<FieldInfo>();
 	private ArrayList<IndexInfo> indexes = new ArrayList<IndexInfo>();
@@ -34,8 +34,6 @@ class TableInfo implements Serializable
 		this.requiredDataItemList = requiredDataItemList;
 		this.lastUpdated = lastUpdated;
 		this.userID = userID;
-		
-		this.fileDocumentation = "";
 	}
 	
 	public String getFileName()
