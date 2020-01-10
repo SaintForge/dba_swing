@@ -6,13 +6,17 @@ import sanchez.jdbc.pool.ScConnectionPoolDataSource;
 import sanchez.jdbc.pool.ScJDBCConnectionPoolCache;
 import sanchez.jdbc.pool.ScJdbcPool;
 //import fisglobal.jdbc.driver.ScDriver;
+
 import java.util.Properties;
 import java.util.ArrayList;
 import java.util.Vector;
 import java.util.HashMap;
 import java.util.Map;
 
-class SQLService
+import javax.swing.JFrame; 
+import javax.swing.SwingWorker;
+
+class SQLService extends SwingWorker<Object, Object>
 {
     private static String driver_name = 
 		"sanchez.jdbc.driver.ScDriver";
@@ -23,8 +27,10 @@ class SQLService
     private String port;
 	private String url;
 	
-     private Connection connection;
-    
+	private Connection connection;
+	
+	private ArrayList<TableInfo> tableInfoArray;
+	
     SQLService() {}
     SQLService(String server_address, String server_port, 
                String username, String user_password)
@@ -38,15 +44,23 @@ class SQLService
 		this.url = "protocol=jdbc:sanchez/database="+ server_address + ":" + server_port + ":SCA$IBS/locale=US:ENGLISH/timeOut=2/transType=MTM/rowPrefetch=3000/signOnType=1/fileEncoding=UTF-8";
     }
 	
+	public boolean runDialog(JFrame frame, ArrayList<TableInfo> tableArray, SettingsData settings)
+	{
+		boolean result = false;
+		
+		
+		
+		return (result);
+	}
+	
 	public void connect() throws ClassNotFoundException, SQLException
 	{
 		Class.forName(driver_name);
-        
         ScDriver driver = new ScDriver();
 		DriverManager.registerDriver(driver);
 		connection = DriverManager.getConnection(this.url, this.username, this. password);
 		
-		System.out.print("Connected.\n");
+		System.out.println("Connecting...");
 	}
 	
 	public TableInfo run_query(String fileName, int fieldAmount, int indexAmount) throws SQLException
@@ -71,8 +85,8 @@ class SQLService
 									  rsFid.getString(7),   // Required Data Item List
 									  rsFid.getString(8),   // Last Updated
 										  rsFid.getString(9));  // User ID
-			}
-			
+		}
+		
 			sql = "SELECT FID, DI, NOD, POS, DES, TYP, LEN, DEC, REQ, TBL, CMP FROM DBTBL1D WHERE FID = '" + tableInfo.getFileName() + "'";
 			
 			prep = connection.prepareStatement(sql);
@@ -129,6 +143,8 @@ class SQLService
     public void run_dba(ArrayList<TableInfo> fid) throws SQLException
                         
 	{
+		setProgress(1);
+		
         long time1      = System.currentTimeMillis();
         String fileName = "";
 		int fileIndex   = 0;
@@ -156,6 +172,8 @@ class SQLService
             
 			tableMap.put(fileName, fileIndex++);
 		}
+		
+		setProgress(2);
 		
         sql = "SELECT FID, DI, NOD, POS, DES, TYP, LEN, DEC, REQ, TBL, CMP FROM DBTBL1D" ;
         PreparedStatement prep1 = connection.prepareStatement(sql);
@@ -185,6 +203,8 @@ class SQLService
 			
         }
 		
+		setProgress(3);
+		
 		sql = "SELECT FID, INDEXNM, GLOBAL, ORDERBY, IDXDESC, UPCASE, PARFID FROM DBTBL8";
 		PreparedStatement prep2 = connection.prepareStatement(sql);
 		prep2.setFetchSize(500);
@@ -205,6 +225,8 @@ class SQLService
 																  rsIndex.getString(7))); // Super Type File Name
 			}
 		}
+		
+		setProgress(4);
 		
 		sql = "SELECT FID, DES FROM DBTBL1TBLDOC";
 		PreparedStatement prep3 = connection.prepareStatement(sql);
@@ -241,6 +263,45 @@ class SQLService
 	public boolean isConnected()
 	{
 		return connection == null ? false : true;
+	}
+	
+	@Override 
+		protected Object doInBackground() 
+		throws Exception 
+	{
+		try
+		{
+			setProgress(0);
+			connect();
+			if (isConnected())
+			{
+				tableInfoArray = new ArrayList<TableInfo>();
+				run_dba(tableInfoArray);
+				
+				 // Just for the gui to show final message
+				setProgress(5);
+				Thread.sleep(250);
+			}
+		}
+		catch(SQLException exc)
+		{
+			exc.printStackTrace();
+		}
+		catch(ClassNotFoundException exc)
+		{
+			exc.printStackTrace();
+		}
+		
+		return null;
+	}
+	
+	public ArrayList<TableInfo> getTableInfoArray()
+	{
+		return tableInfoArray;
+	}
+	public void setTableInfoArray(ArrayList<TableInfo> tableInfoArray)
+	{
+		this.tableInfoArray = tableInfoArray;
 	}
 	
 	public String getAddress()

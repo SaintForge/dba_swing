@@ -105,7 +105,6 @@ class MainFrame extends JFrame implements ChangeListener
     
     public void stateChanged(ChangeEvent event) 
     {
-        System.out.println("MainFrame.stateChanged");
         JTabbedPane tabbedPane = (JTabbedPane)event.getSource();
         
         // Create a new Tab

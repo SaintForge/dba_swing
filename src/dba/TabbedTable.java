@@ -5,6 +5,7 @@ import javax.swing.JTabbedPane;
 import javax.swing.BorderFactory;
 import javax.swing.border.EtchedBorder;
 
+import java.awt.Font;
 import java.awt.BorderLayout;
 
 class TabbedTable extends JPanel
@@ -16,7 +17,6 @@ class TabbedTable extends JPanel
         super(new BorderLayout());
         
         tabs = new JTabbedPane(JTabbedPane.TOP);
-        
         tabs.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
         
         add(tabs, BorderLayout.CENTER);

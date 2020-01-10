@@ -27,6 +27,7 @@ import javax.swing.event.DocumentListener;
 
 import javax.swing.SwingUtilities;
 import javax.swing.JTabbedPane;
+import javax.swing.SwingWorker;
 
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -43,14 +44,15 @@ import java.awt.event.KeyEvent;
 import java.awt.KeyEventDispatcher;
 import java.awt.KeyboardFocusManager;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+
 import java.sql.SQLException;
 
 class DBForm extends JPanel implements ActionListener, DocumentListener, MouseListener
 {
 	private JFrame frame;
 	private EnvironmentData environmentData;
-    
-	//private JPanel panel = new JPanel(new GridBagLayout());
     
     private JTextField tableSearch;
     private TableRowSorter<TableModel> tableSorter;
@@ -160,36 +162,84 @@ class DBForm extends JPanel implements ActionListener, DocumentListener, MouseLi
 	{
         if (event.getSource() == refreshAllButton) {
             
-			try 
 			{
 				SettingsData settings = environmentData.getSettings();
+				
+				int rowIndex = tableList.getTable().getSelectedRow();
 				
 				SQLService sql = new SQLService(settings.getSqlServer(), 
 												settings.getMtmPort(), 
 												settings.getProfileUser(),
 												settings.getProfilePassword());
 				
-				ArrayList<TableInfo> tableArray = new ArrayList<TableInfo>();
+				ProgressDialog dialog = new ProgressDialog(frame, "Updating " + settings.getName());
+				dialog.addLine("Connecting...            ");
+				sql.addPropertyChangeListener(new PropertyChangeListener() {
+												  
+												  @Override
+													  public void propertyChange(PropertyChangeEvent event) {
+													  String name = event.getPropertyName();
+													  if (name.equals("progress"))
+													  {
+														  int progress = (int) event.getNewValue();
+														  switch(progress)
+														  {
+															  case 1:
+															  {
+																  dialog.addLine("Done.\nLoading tables...        ");
+															  } break;
+															  case 2:
+															  {
+																  dialog.addLine("Done.\nLoading fields...        ");
+															  } break;
+															  case 3:
+															  {
+																  dialog.addLine("Done.\nLoading indexes...       ");
+															  } break;
+															  case 4:
+															  {
+																  dialog.addLine("Done.\nLoading documentation... ");
+															  } break;
+															  case 5:
+															  {
+																  dialog.addLine("Done.\nCompleted.");
+															  } break;
+														  }
+														  
+														  repaint();
+													  }
+													  else if (name.equals("state"))
+													  {
+														  SwingWorker.StateValue state = (SwingWorker.StateValue) event.getNewValue();
+														  switch(state)
+														  {
+															  case DONE:
+															  {
+																  ArrayList<TableInfo> tableArray = sql.getTableInfoArray();
+																  environmentData.setTableArray(tableArray);
+																  tableList.populateDataTableArray(tableArray);
+																  GlobalData.writeToFile();
+																  
+																  if (rowIndex != -1)
+																  {
+																	  System.out.println("rawRowIndex: " + rowIndex);
+																	  int rawRowIndex = tableList.getTable().convertRowIndexToModel(rowIndex);
+																	  
+																	  tableList.selectRow(rawRowIndex);
+																  }
+																  
+																  dialog.close();
+															  } break;
+														  }
+													  }
+												  }
+											  });
+				sql.execute();
 				
-				sql.connect();
-				if (sql.isConnected())
-				{
-					sql.run_dba(tableArray);
-					environmentData.setTableArray(tableArray);
-					tableList.populateDataTableArray(tableArray);
-					
-					GlobalData.writeToFile();
-				}
+				dialog.pack();
+					dialog.setLocationRelativeTo(null); 
+				dialog.setVisible(true);
 			}
-			catch(ClassNotFoundException exc)
-			{
-				
-			}
-			catch(SQLException exc)
-			{
-				
-			}
-			
 		}
 		else if (event.getSource() == settingsButton) 
 		{
@@ -232,11 +282,11 @@ class DBForm extends JPanel implements ActionListener, DocumentListener, MouseLi
 				}
 				catch(ClassNotFoundException exc)
 				{
-					
+					exc.printStackTrace();
 				}
 				catch(SQLException exc)
 				{
-					
+					exc.printStackTrace();
 				}
 			}
 		}

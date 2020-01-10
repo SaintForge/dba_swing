@@ -79,6 +79,15 @@ class Table extends JPanel implements KeyListener
 		column.setPreferredWidth(200);
     }
 	
+	public void setColumnsWidth(int firstColumn, int secondColumn)
+	{
+		TableColumn column = table.getColumnModel().getColumn(0);
+		column.setPreferredWidth(firstColumn);
+		
+		column = table.getColumnModel().getColumn(1);
+		column.setPreferredWidth(secondColumn);
+	}
+	
 	public void selectRow(int rowIndex)
 	{
 		table.setRowSelectionInterval(rowIndex, rowIndex);
@@ -87,8 +96,6 @@ class Table extends JPanel implements KeyListener
     // populate data functions
     public void populateDataTableInfo(TableInfo tableInfo)
     {
-        System.out.println("populateTableProps");
-        
         String tableProperties[] = 
 		{
 			"File Name",
@@ -187,7 +194,6 @@ class Table extends JPanel implements KeyListener
     
     public void populateDataStringArray(String data[])
     {
-        System.out.println("populateTable");
         model.setRowCount(0);
         
         for(int i = 0; i < data.length; ++i)
@@ -223,8 +229,6 @@ class Table extends JPanel implements KeyListener
 	@Override
         public void keyReleased(KeyEvent event)
 	{
-		// System.out.println(event.getKeyCode());
-		
 		if (event.isControlDown())	
 		{
 			if (event.getKeyCode() == KeyEvent.VK_C)

@@ -22,7 +22,6 @@ class SettingsDialog extends JDialog
 	
 	private JButton okButton = new JButton("OK");
 	private JButton cancelButton = new JButton("Cancel"); 
-    private JButton deleteButton = new JButton("Delete");
 	private SettingsData settings = new SettingsData();
 	
 	private JPanel panel;
@@ -33,17 +32,18 @@ class SettingsDialog extends JDialog
 	{
 		JLabel label = new JLabel();
 		label.setText(labelName);
+		label.setFont(new Font("Courier New", Font.PLAIN, 12));
 		
 		this.panel.add(label);
 		this.springLayout.putConstraint("West", label, 10, "West", this.panel);
-		this.springLayout.putConstraint("North", label, 30, "North", this.prevComponent);
+		this.springLayout.putConstraint("North", label, 35, "North", this.prevComponent);
 		
 		Component comp = new JTextField();
 		comp.setName(labelName.substring(0, labelName.length()));
 		comp.setFont( new Font( "Courier New", Font.BOLD, 12));
 		
 		this.panel.add(comp);
-		this.springLayout.putConstraint("West", comp, 120, "West", this.panel);
+		this.springLayout.putConstraint("West", comp, 130, "West", this.panel);
 		this.springLayout.putConstraint("East", comp, 0, "East", this.cancelButton);
 		this.springLayout.putConstraint("North", comp, 30, "North", this.prevComponent);
 		comp.setPreferredSize(new Dimension(80, 25));
@@ -55,12 +55,12 @@ class SettingsDialog extends JDialog
 	{
 		super(owner, title, true);
         
-		this.springLayout = new SpringLayout();
-		this.panel = new JPanel(this.springLayout);
-		this.prevComponent = this.panel;
+		springLayout = new SpringLayout();
+		panel = new JPanel(springLayout);
+		prevComponent = panel;
 		
 		int w = 300;
-		int h = 250;
+		int h = 260;
 		setPreferredSize(new Dimension(w, h));
 		
 		addElement("Name:");
@@ -81,17 +81,11 @@ class SettingsDialog extends JDialog
 										}
 										}
 										});
-        
-        if (isUpdate)
-        {
-            panel.add(deleteButton);
-            springLayout.putConstraint("South", this.deleteButton, -10, "South", this.panel);
-            springLayout.putConstraint("East", this.deleteButton, -10, "West", this.okButton);
-        }
+		//okButton.setPreferredSize(new Dimension(50, 30));
 		
-		this.panel.add(this.okButton);
-		this.springLayout.putConstraint("South", this.okButton, -10, "South", this.panel);
-		this.springLayout.putConstraint("East", this.okButton, -10, "West", this.cancelButton);
+		panel.add(this.okButton);
+		springLayout.putConstraint("South", this.okButton, -10, "South", this.panel);
+		springLayout.putConstraint("East", this.okButton, -10, "West", this.cancelButton);
 		
 		this.cancelButton.addActionListener(new ActionListener()
 											{
@@ -113,7 +107,7 @@ class SettingsDialog extends JDialog
 		int y = rect.y + (rect.height - h) / 2;
 		
 		setLocation(x, y);
-		setResizable(false);
+		//setResizable(false);
 	}
 	
 	SettingsDialog(JFrame owner, String title, SettingsData settings)

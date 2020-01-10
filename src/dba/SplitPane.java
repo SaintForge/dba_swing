@@ -26,6 +26,7 @@ class SplitPane extends JPanel implements MouseListener
         
         valueTable = new Table("Property", "Value");
         valueTable.getTable().addMouseListener(this);
+		valueTable.setColumnsWidth(30, 100);
         
         splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, selectTable.getScrollPane(), valueTable.getScrollPane());
         splitPane.setDividerLocation(150);
