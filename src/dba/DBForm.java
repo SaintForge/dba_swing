@@ -171,6 +171,7 @@ class DBForm extends JPanel implements ActionListener, DocumentListener, MouseLi
 												settings.getMtmPort(), 
 												settings.getProfileUser(),
 												settings.getProfilePassword());
+				sql.setIsDBA(true);
 				
 				ProgressDialog dialog = new ProgressDialog(frame, "Updating " + settings.getName());
 				dialog.addLine("Connecting...            ");
@@ -215,7 +216,7 @@ class DBForm extends JPanel implements ActionListener, DocumentListener, MouseLi
 														  {
 															  case DONE:
 															  {
-																  ArrayList<TableInfo> tableArray = sql.getTableInfoArray();
+																  ArrayList<TableInfo> tableArray = sql.getTableInfoArrayBuffer();
 																  environmentData.setTableArray(tableArray);
 																  tableList.populateDataTableArray(tableArray);
 																  GlobalData.writeToFile();
@@ -237,16 +238,19 @@ class DBForm extends JPanel implements ActionListener, DocumentListener, MouseLi
 				sql.execute();
 				
 				dialog.pack();
-					dialog.setLocationRelativeTo(null); 
 				dialog.setVisible(true);
 			}
 		}
 		else if (event.getSource() == settingsButton) 
 		{
-            SettingsData newSettings = SettingsDialog.updateNewDialog(frame, environmentData.getSettings());
-			environmentData.setSettings(newSettings);
+			SettingsData newSettings = environmentData.getSettings();
 			
-			GlobalData.writeToFile();
+			boolean toSave = SettingsDialog.updateNewDialog(frame, newSettings);
+			if (toSave)
+			{
+				environmentData.setSettings(newSettings);
+				GlobalData.writeToFile();
+			}
 		}
 		else if (event.getSource() == refreshTableButton)
 		{
@@ -263,6 +267,8 @@ class DBForm extends JPanel implements ActionListener, DocumentListener, MouseLi
 													settings.getMtmPort(), 
 													settings.getProfileUser(),
 													settings.getProfilePassword());
+					sql.setIsDBA(false);
+													
 					
 					sql.connect();
 					if (sql.isConnected())

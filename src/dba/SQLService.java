@@ -26,10 +26,12 @@ class SQLService extends SwingWorker<Object, Object>
     private String password;
     private String port;
 	private String url;
+	private boolean isDBA;
 	
 	private Connection connection;
 	
-	private ArrayList<TableInfo> tableInfoArray;
+	private TableInfo tableInfoBuffer;
+	private ArrayList<TableInfo> tableInfoArrayBuffer;
 	
     SQLService() {}
     SQLService(String server_address, String server_port, 
@@ -44,23 +46,12 @@ class SQLService extends SwingWorker<Object, Object>
 		this.url = "protocol=jdbc:sanchez/database="+ server_address + ":" + server_port + ":SCA$IBS/locale=US:ENGLISH/timeOut=2/transType=MTM/rowPrefetch=3000/signOnType=1/fileEncoding=UTF-8";
     }
 	
-	public boolean runDialog(JFrame frame, ArrayList<TableInfo> tableArray, SettingsData settings)
-	{
-		boolean result = false;
-		
-		
-		
-		return (result);
-	}
-	
 	public void connect() throws ClassNotFoundException, SQLException
 	{
 		Class.forName(driver_name);
         ScDriver driver = new ScDriver();
 		DriverManager.registerDriver(driver);
 		connection = DriverManager.getConnection(this.url, this.username, this. password);
-		
-		System.out.println("Connecting...");
 	}
 	
 	public TableInfo run_query(String fileName, int fieldAmount, int indexAmount) throws SQLException
@@ -176,11 +167,11 @@ class SQLService extends SwingWorker<Object, Object>
 		setProgress(2);
 		
         sql = "SELECT FID, DI, NOD, POS, DES, TYP, LEN, DEC, REQ, TBL, CMP FROM DBTBL1D" ;
-        PreparedStatement prep1 = connection.prepareStatement(sql);
-        prep1.setFetchSize(10000);
-        prep1.setMaxRows(40000);
+        prep = connection.prepareStatement(sql);
+        prep.setFetchSize(10000);
+        prep.setMaxRows(40000);
 		
-        ResultSet rs_di = prep1.executeQuery();
+        ResultSet rs_di = prep.executeQuery();
         while(rs_di.next())
         {
              fileName = rs_di.getString(1);
@@ -206,10 +197,10 @@ class SQLService extends SwingWorker<Object, Object>
 		setProgress(3);
 		
 		sql = "SELECT FID, INDEXNM, GLOBAL, ORDERBY, IDXDESC, UPCASE, PARFID FROM DBTBL8";
-		PreparedStatement prep2 = connection.prepareStatement(sql);
-		prep2.setFetchSize(500);
+		 prep = connection.prepareStatement(sql);
+		prep.setFetchSize(500);
 		
-		ResultSet rsIndex = prep2.executeQuery();
+		ResultSet rsIndex = prep.executeQuery();
 		while(rsIndex.next())
 		{
 			fileName = rsIndex.getString(1);
@@ -229,10 +220,10 @@ class SQLService extends SwingWorker<Object, Object>
 		setProgress(4);
 		
 		sql = "SELECT FID, DES FROM DBTBL1TBLDOC";
-		PreparedStatement prep3 = connection.prepareStatement(sql);
-		prep3.setFetchSize(7000);
+		prep = connection.prepareStatement(sql);
+		prep.setFetchSize(7000);
 		
-		ResultSet rsDocs = prep3.executeQuery();
+		ResultSet rsDocs = prep.executeQuery();
 		while(rsDocs.next())
 		{
 			fileName = rsDocs.getString(1);
@@ -251,8 +242,12 @@ class SQLService extends SwingWorker<Object, Object>
         float diff  = (time2 - time1) / 1024.0f;
         System.out.println("Time elapsed (sec): " + diff);
         
-        rs_fid.close();
-        rs_di.close();
+        if (rs_fid != null)  rs_fid.close();
+        if (rs_di != null)   rs_di.close();
+		if (rsIndex != null) rsIndex.close();
+		if (rsDocs != null)  rsDocs.close();
+		
+		if (prep != null)    prep.close();
 	}
     
 	static String checkStringOrNull(String obj)
@@ -275,8 +270,13 @@ class SQLService extends SwingWorker<Object, Object>
 			connect();
 			if (isConnected())
 			{
-				tableInfoArray = new ArrayList<TableInfo>();
-				run_dba(tableInfoArray);
+				if (isDBA)
+				{
+					tableInfoArrayBuffer = new ArrayList<TableInfo>();
+					run_dba(tableInfoArrayBuffer);
+				}
+				
+				if (connection != null) connection.close();
 				
 				 // Just for the gui to show final message
 				setProgress(5);
@@ -295,13 +295,13 @@ class SQLService extends SwingWorker<Object, Object>
 		return null;
 	}
 	
-	public ArrayList<TableInfo> getTableInfoArray()
+	public ArrayList<TableInfo> getTableInfoArrayBuffer()
 	{
-		return tableInfoArray;
+		return tableInfoArrayBuffer;
 	}
-	public void setTableInfoArray(ArrayList<TableInfo> tableInfoArray)
+	public void setTableInfoArrayBuffer(ArrayList<TableInfo> tableInfoArrayBuffer)
 	{
-		this.tableInfoArray = tableInfoArray;
+		this.tableInfoArrayBuffer = tableInfoArrayBuffer;
 	}
 	
 	public String getAddress()
@@ -347,5 +347,14 @@ class SQLService extends SwingWorker<Object, Object>
 	public void setUrl(String url)
 	{
 		this.url = url;
+	}
+	
+	public boolean getIsDBA()
+	{
+		return isDBA;
+	}
+	public void setIsDBA(boolean isDBA)
+	{
+		this.isDBA = isDBA;
 	}
 }

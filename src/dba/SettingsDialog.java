@@ -22,11 +22,14 @@ class SettingsDialog extends JDialog
 	
 	private JButton okButton = new JButton("OK");
 	private JButton cancelButton = new JButton("Cancel"); 
+    private JButton deleteButton = new JButton("Delete");
 	private SettingsData settings = new SettingsData();
 	
 	private JPanel panel;
 	private SpringLayout springLayout;
 	private Component prevComponent;
+	
+	private boolean okPressed = false;
 	
 	public void addElement(String labelName) 
 	{
@@ -34,21 +37,21 @@ class SettingsDialog extends JDialog
 		label.setText(labelName);
 		label.setFont(new Font("Courier New", Font.PLAIN, 12));
 		
-		this.panel.add(label);
-		this.springLayout.putConstraint("West", label, 10, "West", this.panel);
-		this.springLayout.putConstraint("North", label, 35, "North", this.prevComponent);
+		panel.add(label);
+		springLayout.putConstraint("West", label, 10, "West", panel);
+		springLayout.putConstraint("North", label, 35, "North", prevComponent);
 		
 		Component comp = new JTextField();
 		comp.setName(labelName.substring(0, labelName.length()));
 		comp.setFont( new Font( "Courier New", Font.BOLD, 12));
 		
-		this.panel.add(comp);
-		this.springLayout.putConstraint("West", comp, 130, "West", this.panel);
-		this.springLayout.putConstraint("East", comp, 0, "East", this.cancelButton);
-		this.springLayout.putConstraint("North", comp, 30, "North", this.prevComponent);
+		panel.add(comp);
+		springLayout.putConstraint("West", comp, 130, "West", panel);
+		springLayout.putConstraint("East", comp, 0, "East", cancelButton);
+		springLayout.putConstraint("North", comp, 30, "North", prevComponent);
 		comp.setPreferredSize(new Dimension(80, 25));
 		
-		this.prevComponent = comp;
+		prevComponent = comp;
 	}
 	
 	SettingsDialog(JFrame owner, String title, Boolean isUpdate)
@@ -69,7 +72,7 @@ class SettingsDialog extends JDialog
 		addElement("Profile User:");
 		addElement("Profile Password:");
 		
-		this.okButton.addActionListener(new ActionListener()
+		okButton.addActionListener(new ActionListener()
 										{
 										public void actionPerformed(ActionEvent arg0)
 										{
@@ -77,17 +80,17 @@ class SettingsDialog extends JDialog
 										
 										String name = settings.getName();
 										if (name != null && !name.isEmpty()) {
-										SettingsDialog.this.setVisible(false);
+											   SettingsDialog.this.setVisible(false);
+											   okPressed = true;
 										}
 										}
 										});
-		//okButton.setPreferredSize(new Dimension(50, 30));
 		
-		panel.add(this.okButton);
-		springLayout.putConstraint("South", this.okButton, -10, "South", this.panel);
-		springLayout.putConstraint("East", this.okButton, -10, "West", this.cancelButton);
+		panel.add(okButton);
+		springLayout.putConstraint("South", okButton, -10, "South", panel);
+		springLayout.putConstraint("East", okButton, -10, "West", cancelButton);
 		
-		this.cancelButton.addActionListener(new ActionListener()
+		cancelButton.addActionListener(new ActionListener()
 											{
 											public void actionPerformed(ActionEvent arg0)
 											{
@@ -95,9 +98,9 @@ class SettingsDialog extends JDialog
 											}
 											});
 		
-		this.panel.add(this.cancelButton);
-		this.springLayout.putConstraint("South", this.cancelButton, -10, "South", this.panel);
-		this.springLayout.putConstraint("East", this.cancelButton, -10, "East", this.panel);
+		panel.add(cancelButton);
+		springLayout.putConstraint("South", cancelButton, -10, "South", panel);
+		springLayout.putConstraint("East", cancelButton, -10, "East", panel);
 		
 		Container pane = getContentPane();
 		pane.add(panel);
@@ -137,14 +140,16 @@ class SettingsDialog extends JDialog
 		return dialog.settings;
 	}
 	
-	public static SettingsData updateNewDialog(JFrame parent, SettingsData settings)
+	public static boolean updateNewDialog(JFrame parent, SettingsData settings)
 	{
 		SettingsDialog dialog = new SettingsDialog(parent, settings.getName(), settings);
 		
 		dialog.pack();
 		dialog.setVisible(true);
 		
-		return dialog.settings;
+		settings = dialog.settings;
+		
+		return dialog.isOKPressed();
 	}
 	
 	public void saveSettings()
@@ -159,6 +164,11 @@ class SettingsDialog extends JDialog
 	public JPanel getPanel()
 	{
 		return panel;
+	}
+	
+	public boolean isOKPressed()
+	{
+		return okPressed;
 	}
 	
 	public String getProperty(String name)

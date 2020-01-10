@@ -26,9 +26,9 @@ class MainFrame extends JFrame implements ChangeListener
     
     MainFrame()
     {
-        this.setSize(1200, 600);
-        this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		this.setTitle("Profile DBA");
+        setSize(1200, 600);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setTitle("Profile DBA");
         
         tabs = new JTabbedPane(JTabbedPane.TOP);
 		tabs.setFont( new Font( "Courier New", Font.BOLD, 12));
@@ -52,28 +52,28 @@ class MainFrame extends JFrame implements ChangeListener
         JPanel tab_panel = new JPanel(new GridLayout(1, 1));
         tab_panel.add(tabs);
         
-        this.getContentPane().add(tab_panel);
-        this.setPreferredSize(new Dimension(1200, 768));
-        this.pack();
-        this.setLocationRelativeTo(null);
-        this.setVisible(true);
+        getContentPane().add(tab_panel);
+        setPreferredSize(new Dimension(1200, 768));
+        pack();
+        setLocationRelativeTo(null);
+        setVisible(true);
         
         if (tabs.getTabCount() == 1) 
         {
-            createNewTab(tabs);
+            createNewTab();
         }
     }
     
-    private void createNewTab(JTabbedPane pane)
+    private void createNewTab()
     {
         SettingsData settings = openSettingsDialog();
         
         if (settings.getName() == null || settings.getName().isEmpty()) {
-            if (pane.getTabCount() == 1) {
+            if (tabs.getTabCount() == 1) {
                 this.dispatchEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING));
             }
             
-            pane.setSelectedIndex(pane.getSelectedIndex()-1);
+            tabs.setSelectedIndex(tabs.getSelectedIndex()-1);
             return;
         }
 		else
@@ -84,23 +84,24 @@ class MainFrame extends JFrame implements ChangeListener
 				SettingsData settingsData = dataList.get(i).getSettings();
 				if (settingsData.getName().equals(settings.getName()))
 				{
-					pane.setSelectedIndex(pane.getSelectedIndex()-1);
+					tabs.setSelectedIndex(tabs.getSelectedIndex()-1);
 					return;
 				}
 			}
 		}
 		
 		EnvironmentData environmenData = new EnvironmentData(settings);
-        pane.addTab(settings.getName(), null, new DBForm(environmenData, this), null);
+        tabs.addTab(settings.getName(), null, new DBForm(environmenData, this), null);
 		
 		GlobalData.getInstance().data.add(environmenData);
 		GlobalData.writeToFile();
         
-        pane.addTab(" + ", null, new JPanel(), null);
-        pane.setSelectedIndex(pane.getTabCount() - 2);
-        pane.remove(pane.getTabCount() - 3);
+        tabs.addTab("+", null, new JPanel(), null);
+        tabs.setSelectedIndex(tabs.getTabCount() - 2);
+        tabs.remove(tabs.getTabCount() - 3);
+		//tabs.setFont( new Font( "Courier New", Font.PLAIN, 12));
         
-        pane.setTabComponentAt(pane.getSelectedIndex(), new ButtonTabComponent(pane));
+        tabs.setTabComponentAt(tabs.getSelectedIndex(), new ButtonTabComponent(tabs));
     }
     
     public void stateChanged(ChangeEvent event) 
@@ -110,7 +111,7 @@ class MainFrame extends JFrame implements ChangeListener
         // Create a new Tab
         if (tabbedPane.getSelectedIndex() == (tabbedPane.getTabCount() - 1))
         {
-            createNewTab(tabbedPane);
+            createNewTab();
         }
     }
     
