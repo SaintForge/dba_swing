@@ -5,6 +5,7 @@ import javax.swing.*;
 import javax.swing.plaf.basic.BasicButtonUI;
 import java.awt.*;
 import java.awt.event.*;
+import javax.swing.JOptionPane;
 
 public class ButtonTabComponent extends JPanel {
     private final JTabbedPane pane;
@@ -67,16 +68,20 @@ public class ButtonTabComponent extends JPanel {
         
         public void actionPerformed(ActionEvent e) 
         {
-            
-            int i = pane.indexOfTabComponent(ButtonTabComponent.this);
-            if (i != -1) 
-            {
-                pane.remove(i);
-                pane.setSelectedIndex(0);
-				
-				GlobalData.getInstance().data.remove(i);
-				GlobalData.writeToFile();
-            }
+            int input = JOptionPane.showConfirmDialog(null, "Are you Sure?", "Delete Tab", JOptionPane.YES_NO_OPTION);
+			if (input == 0)
+			{
+				int i = pane.indexOfTabComponent(ButtonTabComponent.this);
+				if (i != -1) 
+				{
+					if (i > 0) pane.setSelectedIndex(i-1);
+						
+					GlobalData.getInstance().data.remove(i);
+					GlobalData.writeToFile();
+					
+					pane.remove(i);
+				}
+			}
         }
         
         //we don't want to update UI for this button

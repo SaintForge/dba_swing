@@ -6,14 +6,23 @@ import javax.swing.JPanel;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
+import javax.swing.table.TableColumn;
 import javax.swing.JTable;
 import javax.swing.JScrollPane;
 import javax.swing.BorderFactory;
 
 import java.awt.BorderLayout;
 import java.awt.Font;
+import java.awt.Color;
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
+import java.awt.event.KeyListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 
-class Table extends JPanel
+
+class Table extends JPanel implements KeyListener
 {
     DefaultTableModel model;
     JTable table;
@@ -34,6 +43,7 @@ class Table extends JPanel
 		table.setShowVerticalLines(true);
 		table.setDefaultEditor(Object.class, null);
 		table.getTableHeader().setReorderingAllowed(false);
+		table.addKeyListener(this);
         
         scrollPane = new JScrollPane(table);
 		add(scrollPane, BorderLayout.CENTER);
@@ -47,17 +57,26 @@ class Table extends JPanel
         model = new DefaultTableModel();
         model.addColumn(firstColumnName);
         model.addColumn(secondColumnName);
+		
+		
         
         table = new JTable(model);
         table.setFillsViewportHeight(true);
 		table.setFont(new Font("Courier New", Font.PLAIN, 14));
 		table.setShowVerticalLines(true);
 		table.setDefaultEditor(Object.class, null);
-		table.getTableHeader().setReorderingAllowed(false);
+		table.getTableHeader().setReorderingAllowed(true);
+		//table.setPreferredScrollableViewportSize(table.getPreferredSize());
+		table.addKeyListener(this);
         
         scrollPane = new JScrollPane(table);
-		
 		add(scrollPane, BorderLayout.CENTER);
+		
+		TableColumn column = table.getColumnModel().getColumn(0);
+		column.setPreferredWidth(10);
+		
+		column = table.getColumnModel().getColumn(1);
+		column.setPreferredWidth(200);
     }
 	
 	public void selectRow(int rowIndex)
@@ -199,6 +218,48 @@ class Table extends JPanel
         table.setModel(model);
         model.fireTableDataChanged();
     }
+	
+	
+	@Override
+        public void keyReleased(KeyEvent event)
+	{
+		// System.out.println(event.getKeyCode());
+		
+		if (event.isControlDown())	
+		{
+			if (event.getKeyCode() == KeyEvent.VK_C)
+			{
+				if (event.getSource() == table)
+				{
+					copy_cell_to_clipboard(table);
+				}
+			}
+		}
+	}
+	
+	void copy_cell_to_clipboard(JTable table)
+	{
+		int row = table.getSelectedRow();
+		int col = table.getSelectedColumn();
+		
+		if (row != -1 && col != -1)
+		{
+			Object value = table.getValueAt(row, col);
+			value = value != null ? value : "";
+			
+			StringSelection string_selection = new StringSelection(value.toString());
+			
+			Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+			clipboard.setContents(string_selection, string_selection);
+		}
+	}
+	
+	@Override
+        public void keyPressed(KeyEvent event) {}
+	
+	@Override
+        public void keyTyped(KeyEvent event) {}
+	
     
     public void setRowSorter(TableRowSorter<TableModel> tableSorter)
     {
@@ -219,4 +280,6 @@ class Table extends JPanel
     {
         return model;
     }
+	
+	
 }

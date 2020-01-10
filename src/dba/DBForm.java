@@ -19,10 +19,12 @@ import javax.swing.RowFilter;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
+import javax.swing.table.TableColumn;
 import javax.swing.BorderFactory;
 import javax.swing.border.EtchedBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+
 import javax.swing.SwingUtilities;
 import javax.swing.JTabbedPane;
 
@@ -37,6 +39,9 @@ import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
+import java.awt.KeyEventDispatcher;
+import java.awt.KeyboardFocusManager;
 
 import java.sql.SQLException;
 
@@ -72,6 +77,9 @@ class DBForm extends JPanel implements ActionListener, DocumentListener, MouseLi
 	{
 		setLayout(new GridBagLayout());
 		this.frame = frame;
+		
+		KeyboardFocusManager manager = KeyboardFocusManager.getCurrentKeyboardFocusManager();
+        manager.addKeyEventDispatcher(new MyDispatcher());
         
         // initializing basic data settings
 		this.environmentData = environmentData;
@@ -231,8 +239,6 @@ class DBForm extends JPanel implements ActionListener, DocumentListener, MouseLi
 					
 				}
 			}
-			
-			
 		}
 	}
     
@@ -241,10 +247,11 @@ class DBForm extends JPanel implements ActionListener, DocumentListener, MouseLi
         public void insertUpdate(DocumentEvent event)
     {
         JTextField tmpSearch;
-        TableRowSorter tmpSorter;
         if (event.getDocument() == tableSearch.getDocument()) 
         {
             String text = tableSearch.getText();
+			text = text.replaceAll("[^a-zA-Z0-9]", "");
+			
             if (text.trim().length() == 0)
             {
                 tableSorter.setRowFilter(null);
@@ -257,6 +264,8 @@ class DBForm extends JPanel implements ActionListener, DocumentListener, MouseLi
         else if (event.getDocument() == fieldSearch.getDocument())
         {
             String text = fieldSearch.getText();
+			text = text.replaceAll("[^a-zA-Z0-9]", "");
+			
             if (text.trim().length() == 0)
             {
                 fieldSorter.setRowFilter(null);
@@ -376,13 +385,33 @@ class DBForm extends JPanel implements ActionListener, DocumentListener, MouseLi
     
     @Override
 		public void mouseExited(MouseEvent event) {}
-	
 	@Override
 		public void mouseEntered(MouseEvent event) {}
-	
 	@Override
 		public void mouseClicked(MouseEvent event) {}
-	
 	@Override
 		public void mouseReleased(MouseEvent event) {}
+	
+	private class MyDispatcher implements KeyEventDispatcher {
+        @Override
+			public boolean dispatchKeyEvent(KeyEvent event) {	
+			
+			if (event.getID() == KeyEvent.KEY_PRESSED) 
+			{
+				if (event.isControlDown())
+				{
+					if (event.getKeyCode() == KeyEvent.VK_1)
+					{
+						tableSearch.requestFocus();
+					}
+					else if(event.getKeyCode() == KeyEvent.VK_2)
+					{
+						fieldSearch.requestFocus();
+					}
+				}
+            } 
+			
+			return false;
+        }
+    }
 }

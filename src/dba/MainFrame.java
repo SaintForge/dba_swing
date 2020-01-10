@@ -28,6 +28,7 @@ class MainFrame extends JFrame implements ChangeListener
     {
         this.setSize(1200, 600);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		this.setTitle("Profile DBA");
         
         tabs = new JTabbedPane(JTabbedPane.TOP);
 		tabs.setFont( new Font( "Courier New", Font.BOLD, 12));
@@ -35,7 +36,8 @@ class MainFrame extends JFrame implements ChangeListener
 		GlobalData.readFromFile();
 		  ArrayList<EnvironmentData> dataList = GlobalData.getInstance().data;
 		
-		for (int i = 0; i < dataList.size(); ++i) {
+		for (int i = 0; i < dataList.size(); ++i) 
+		{
 			EnvironmentData data = dataList.get(i);
 			
 			DBForm form = new DBForm(data, this);
@@ -43,7 +45,7 @@ class MainFrame extends JFrame implements ChangeListener
 			tabs.setTabComponentAt(i, new ButtonTabComponent(tabs));
 		}
 		
-        tabs.addTab(" + ", null, new JPanel(), null);
+        tabs.addTab("+", null, new JPanel(), null);
         tabs.addChangeListener(this);
         tabs.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
         
@@ -51,7 +53,6 @@ class MainFrame extends JFrame implements ChangeListener
         tab_panel.add(tabs);
         
         this.getContentPane().add(tab_panel);
-        
         this.setPreferredSize(new Dimension(1200, 768));
         this.pack();
         this.setLocationRelativeTo(null);
@@ -65,8 +66,6 @@ class MainFrame extends JFrame implements ChangeListener
     
     private void createNewTab(JTabbedPane pane)
     {
-        System.out.println("MainFrame.createNewTab");
-        
         SettingsData settings = openSettingsDialog();
         
         if (settings.getName() == null || settings.getName().isEmpty()) {

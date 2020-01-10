@@ -20,14 +20,14 @@ class SettingsDialog extends JDialog
 {
 	private static final long serialVersionUID = 1L;
 	
-	JButton okButton = new JButton("OK");
-	JButton cancelButton = new JButton("Cancel"); 
-    JButton deleteButton = new JButton("Delete");
-	SettingsData settings = new SettingsData();
+	private JButton okButton = new JButton("OK");
+	private JButton cancelButton = new JButton("Cancel"); 
+    private JButton deleteButton = new JButton("Delete");
+	private SettingsData settings = new SettingsData();
 	
-	JPanel panel;
-	SpringLayout springLayout;
-	Component prevComponent;
+	private JPanel panel;
+	private SpringLayout springLayout;
+	private Component prevComponent;
 	
 	public void addElement(String labelName) 
 	{
@@ -77,8 +77,6 @@ class SettingsDialog extends JDialog
 										
 										String name = settings.getName();
 										if (name != null && !name.isEmpty()) {
-										System.out.println("not null");
-										System.out.println(settings.getName());
 										SettingsDialog.this.setVisible(false);
 										}
 										}
@@ -129,13 +127,15 @@ class SettingsDialog extends JDialog
 		setProperty("MTM Port:", settings.getMtmPort());
 		setProperty("Profile User:", settings.getProfileUser());
 		setProperty("Profile Password:", settings.getProfilePassword());
-		
-		System.out.println("settings SQL Server:" + getProperty("SQL Server:"));
 	}
 	
 	public static SettingsData createNewDialog(JFrame parent)
 	{
 		SettingsDialog dialog = new SettingsDialog(parent, "New Environment", false);
+		
+		SettingsDialog.setProperty(dialog.getPanel(), "SQL Server:", "172.29.7.82");
+		SettingsDialog.setProperty(dialog.getPanel(), "Profile User:", "1");
+		SettingsDialog.setProperty(dialog.getPanel(), "Profile Password:", "xxx");
 		
 		dialog.pack();
 		dialog.setVisible(true);
@@ -155,11 +155,16 @@ class SettingsDialog extends JDialog
 	
 	public void saveSettings()
 	{
-		this.settings.setName(getProperty("Name:"));
-		this.settings.setSqlServer(getProperty("SQL Server:"));
-		this.settings.setMtmPort(getProperty("MTM Port:"));
-		this.settings.setProfileUser(getProperty("Profile User:"));
-		this.settings.setProfilePassword(getProperty("Profile Password:"));
+		settings.setName(getProperty("Name:"));
+		settings.setSqlServer(getProperty("SQL Server:"));
+		settings.setMtmPort(getProperty("MTM Port:"));
+		settings.setProfileUser(getProperty("Profile User:"));
+		settings.setProfilePassword(getProperty("Profile Password:"));
+	}
+	
+	public JPanel getPanel()
+	{
+		return panel;
 	}
 	
 	public String getProperty(String name)
@@ -170,6 +175,20 @@ class SettingsDialog extends JDialog
 			if (((child instanceof JTextField)) && (child.getName() != null) && (child.getName().equalsIgnoreCase(name))) 
 			{
 				return ((JTextField)child).getText();
+			}
+		}
+		return "";
+	}
+	
+	public static String setProperty(JPanel panel, String name, String property)
+	{
+		for (int i = 0; i < panel.getComponents().length; i++)
+		{
+			Component child = panel.getComponent(i);
+			if (((child instanceof JTextField)) && (child.getName() != null) && (child.getName().equalsIgnoreCase(name))) 
+			{
+				
+				((JTextField)child).setText(property);
 			}
 		}
 		return "";
