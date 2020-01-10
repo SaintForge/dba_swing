@@ -111,7 +111,6 @@ class DBForm extends JPanel implements ActionListener, DocumentListener, MouseLi
 		
         // initializing settings button 
 		settingsButton = new JButton("Settings");
-		settingsButton.addActionListener(this);
         
         // initializing refresh table button
         refreshTableButton = new JButton("Update Table");
@@ -239,17 +238,6 @@ class DBForm extends JPanel implements ActionListener, DocumentListener, MouseLi
 				
 				dialog.pack();
 				dialog.setVisible(true);
-			}
-		}
-		else if (event.getSource() == settingsButton) 
-		{
-			SettingsData newSettings = environmentData.getSettings();
-			
-			boolean toSave = SettingsDialog.updateNewDialog(frame, newSettings);
-			if (toSave)
-			{
-				environmentData.setSettings(newSettings);
-				GlobalData.writeToFile();
 			}
 		}
 		else if (event.getSource() == refreshTableButton)
@@ -470,4 +458,9 @@ class DBForm extends JPanel implements ActionListener, DocumentListener, MouseLi
 			return false;
         }
     }
+	
+	public JButton getSettingsButton()
+	{
+		return settingsButton;
+	}
 }

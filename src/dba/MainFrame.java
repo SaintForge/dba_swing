@@ -15,10 +15,12 @@ import java.awt.event.WindowEvent;
 
 import java.awt.Dimension;
 import java.awt.event.KeyEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
 import java.awt.GridLayout;
 import java.awt.Font;
 
-class MainFrame extends JFrame implements ChangeListener
+class MainFrame extends JFrame implements ChangeListener, ActionListener
 {
     private static final long serialVersionUID = 1L;
     
@@ -41,6 +43,7 @@ class MainFrame extends JFrame implements ChangeListener
 			EnvironmentData data = dataList.get(i);
 			
 			DBForm form = new DBForm(data, this);
+			form.getSettingsButton().addActionListener(this);
 			tabs.addTab(data.getSettings().getName(), null, form, null);
 			tabs.setTabComponentAt(i, new ButtonTabComponent(tabs));
 		}
@@ -99,8 +102,6 @@ class MainFrame extends JFrame implements ChangeListener
         tabs.addTab("+", null, new JPanel(), null);
         tabs.setSelectedIndex(tabs.getTabCount() - 2);
         tabs.remove(tabs.getTabCount() - 3);
-		//tabs.setFont( new Font( "Courier New", Font.PLAIN, 12));
-        
         tabs.setTabComponentAt(tabs.getSelectedIndex(), new ButtonTabComponent(tabs));
     }
     
@@ -120,4 +121,24 @@ class MainFrame extends JFrame implements ChangeListener
         SettingsData result = SettingsDialog.createNewDialog(this);
         return (result);
     }
+	
+	@Override
+		public void actionPerformed(ActionEvent event)
+	{
+		System.out.println("actionPerformed");
+		
+		
+			ArrayList<EnvironmentData> dataList = GlobalData.getInstance().data;
+			SettingsData newSettings = dataList.get(tabs.getSelectedIndex()).getSettings();
+			
+			boolean toSave = SettingsDialog.updateNewDialog(this, newSettings);
+			if (toSave)
+			{
+				//environmentData.setSettings(newSettings);
+				dataList.get(tabs.getSelectedIndex()).setSettings(newSettings);
+				GlobalData.writeToFile();
+			
+			tabs.setTitleAt(tabs.getSelectedIndex(), newSettings.getName());
+		}
+	}
 }
