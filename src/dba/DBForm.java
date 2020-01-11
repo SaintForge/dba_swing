@@ -164,6 +164,8 @@ class DBForm extends JPanel implements ActionListener, DocumentListener, MouseLi
 			{
 				SettingsData settings = environmentData.getSettings();
 				
+				
+				
 				int rowIndex = tableList.getTable().getSelectedRow();
 				
 				SQLService sql = new SQLService(settings.getSqlServer(), 
@@ -204,12 +206,12 @@ class DBForm extends JPanel implements ActionListener, DocumentListener, MouseLi
 															  } break;
 															  case 5:
 															  {
-																  dialog.addLine("Done.\nCompleted.");
+																  dialog.addLine("Done.\n\nCompleted.");
 
 															  } break;
 															  case 6:
 															  {
-																  dialog.addLine("Failed.\nFailed to establish MTM connection. Connection timed out.");
+																  dialog.addLine("Failed.\n\nFailed to establish MTM connection.");
 															  } break;
 														  }
 														  
@@ -232,7 +234,6 @@ class DBForm extends JPanel implements ActionListener, DocumentListener, MouseLi
 																	  
 																	  if (rowIndex != -1)
 																	  {
-																		  System.out.println("rawRowIndex: " + rowIndex);
 																		  int rawRowIndex = tableList.getTable().convertRowIndexToModel(rowIndex);
 																		  
 																		  tableList.selectRow(rawRowIndex);

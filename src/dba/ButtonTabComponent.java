@@ -71,10 +71,21 @@ public class ButtonTabComponent extends JPanel {
             int input = JOptionPane.showConfirmDialog(null, "Are you Sure?", "Delete Tab", JOptionPane.YES_NO_OPTION);
 			if (input == 0)
 			{
+				int prevIndex = pane.getSelectedIndex();
 				int i = pane.indexOfTabComponent(ButtonTabComponent.this);
 				if (i != -1) 
 				{
-					if (i > 0) pane.setSelectedIndex(i-1);
+					if (i > 0)
+					{
+						if (i == prevIndex) 
+						{
+							pane.setSelectedIndex(prevIndex-1);
+						}
+						else
+						{
+							pane.setSelectedIndex(prevIndex);
+						}
+					}
 						
 					GlobalData.getInstance().data.remove(i);
 					GlobalData.writeToFile();

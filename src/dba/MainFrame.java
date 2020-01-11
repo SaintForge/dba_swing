@@ -25,7 +25,8 @@ class MainFrame extends JFrame implements ChangeListener, ActionListener
     private static final long serialVersionUID = 1L;
     
     final JTabbedPane tabs;
-    
+	int currentTabIndex = 0;
+	
     MainFrame()
     {
         setSize(1200, 600);
@@ -70,13 +71,13 @@ class MainFrame extends JFrame implements ChangeListener, ActionListener
     private void createNewTab()
     {
         SettingsData settings = openSettingsDialog();
-        
+		
         if (settings.getName() == null || settings.getName().isEmpty()) {
             if (tabs.getTabCount() == 1) {
                 this.dispatchEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING));
             }
             
-            tabs.setSelectedIndex(tabs.getSelectedIndex()-1);
+            tabs.setSelectedIndex(currentTabIndex);
             return;
         }
 		else
@@ -87,7 +88,7 @@ class MainFrame extends JFrame implements ChangeListener, ActionListener
 				SettingsData settingsData = dataList.get(i).getSettings();
 				if (settingsData.getName().equals(settings.getName()))
 				{
-					tabs.setSelectedIndex(tabs.getSelectedIndex()-1);
+					tabs.setSelectedIndex(currentTabIndex);
 					return;
 				}
 			}
@@ -103,6 +104,8 @@ class MainFrame extends JFrame implements ChangeListener, ActionListener
         tabs.setSelectedIndex(tabs.getTabCount() - 2);
         tabs.remove(tabs.getTabCount() - 3);
         tabs.setTabComponentAt(tabs.getSelectedIndex(), new ButtonTabComponent(tabs));
+		
+		currentTabIndex = tabs.getSelectedIndex();
     }
     
     public void stateChanged(ChangeEvent event) 
@@ -114,6 +117,10 @@ class MainFrame extends JFrame implements ChangeListener, ActionListener
         {
             createNewTab();
         }
+		else
+		{
+			currentTabIndex = tabbedPane.getSelectedIndex();
+		}
     }
     
     public SettingsData openSettingsDialog()
@@ -125,9 +132,6 @@ class MainFrame extends JFrame implements ChangeListener, ActionListener
 	@Override
 		public void actionPerformed(ActionEvent event)
 	{
-		System.out.println("actionPerformed");
-		
-		
 			ArrayList<EnvironmentData> dataList = GlobalData.getInstance().data;
 			SettingsData newSettings = dataList.get(tabs.getSelectedIndex()).getSettings();
 			
