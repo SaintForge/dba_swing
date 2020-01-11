@@ -51,6 +51,7 @@ class SQLService extends SwingWorker<Object, Object>
 		Class.forName(driver_name);
         ScDriver driver = new ScDriver();
 		DriverManager.registerDriver(driver);
+		DriverManager.setLoginTimeout(10);
 		connection = DriverManager.getConnection(this.url, this.username, this. password);
 	}
 	
@@ -266,13 +267,14 @@ class SQLService extends SwingWorker<Object, Object>
 	{
 		try
 		{
+			tableInfoArrayBuffer = new ArrayList<TableInfo>();
 			setProgress(0);
+			
 			connect();
 			if (isConnected())
 			{
 				if (isDBA)
 				{
-					tableInfoArrayBuffer = new ArrayList<TableInfo>();
 					run_dba(tableInfoArrayBuffer);
 				}
 				
@@ -286,10 +288,12 @@ class SQLService extends SwingWorker<Object, Object>
 		catch(SQLException exc)
 		{
 			exc.printStackTrace();
+			setProgress(6);
 		}
 		catch(ClassNotFoundException exc)
 		{
 			exc.printStackTrace();
+			setProgress(6);
 		}
 		
 		return null;

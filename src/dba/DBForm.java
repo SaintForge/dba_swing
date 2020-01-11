@@ -172,12 +172,14 @@ class DBForm extends JPanel implements ActionListener, DocumentListener, MouseLi
 												settings.getProfilePassword());
 				sql.setIsDBA(true);
 				
+				
 				ProgressDialog dialog = new ProgressDialog(frame, "Updating " + settings.getName());
 				dialog.addLine("Connecting...            ");
 				sql.addPropertyChangeListener(new PropertyChangeListener() {
 												  
 												  @Override
 													  public void propertyChange(PropertyChangeEvent event) {
+													  
 													  String name = event.getPropertyName();
 													  if (name.equals("progress"))
 													  {
@@ -203,6 +205,11 @@ class DBForm extends JPanel implements ActionListener, DocumentListener, MouseLi
 															  case 5:
 															  {
 																  dialog.addLine("Done.\nCompleted.");
+
+															  } break;
+															  case 6:
+															  {
+																  dialog.addLine("Failed.\nFailed to establish MTM connection. Connection timed out.");
 															  } break;
 														  }
 														  
@@ -216,19 +223,27 @@ class DBForm extends JPanel implements ActionListener, DocumentListener, MouseLi
 															  case DONE:
 															  {
 																  ArrayList<TableInfo> tableArray = sql.getTableInfoArrayBuffer();
-																  environmentData.setTableArray(tableArray);
-																  tableList.populateDataTableArray(tableArray);
-																  GlobalData.writeToFile();
 																  
-																  if (rowIndex != -1)
+																  if (tableArray != null && tableArray.size() > 0)
 																  {
-																	  System.out.println("rawRowIndex: " + rowIndex);
-																	  int rawRowIndex = tableList.getTable().convertRowIndexToModel(rowIndex);
+																	  environmentData.setTableArray(tableArray);
+																	  tableList.populateDataTableArray(tableArray);
+																	  GlobalData.writeToFile();
 																	  
-																	  tableList.selectRow(rawRowIndex);
+																	  if (rowIndex != -1)
+																	  {
+																		  System.out.println("rawRowIndex: " + rowIndex);
+																		  int rawRowIndex = tableList.getTable().convertRowIndexToModel(rowIndex);
+																		  
+																		  tableList.selectRow(rawRowIndex);
+																	  }
+																	  
+																	  dialog.close();
+																  }
+																  else
+																  {
 																  }
 																  
-																  dialog.close();
 															  } break;
 														  }
 													  }

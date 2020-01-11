@@ -58,7 +58,7 @@ class ProgressDialog extends JDialog
 		pane.add(textPane, BorderLayout.CENTER);
 		
 		Rectangle rect = owner.getBounds();
-		int w = 250;
+		int w = 260;
 		int h = 150;
 		int x = rect.x + (rect.width - w) / 2;
 		int y = rect.y + (rect.height - h) / 2;
