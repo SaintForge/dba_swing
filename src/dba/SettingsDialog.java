@@ -110,7 +110,7 @@ class SettingsDialog extends JDialog
 		int y = rect.y + (rect.height - h) / 2;
 		
 		setLocation(x, y);
-		//setResizable(false);
+		setResizable(false);
 	}
 	
 	SettingsDialog(JFrame owner, String title, SettingsData settings)

@@ -58,7 +58,6 @@ class Table extends JPanel implements KeyListener
         model.addColumn(firstColumnName);
         model.addColumn(secondColumnName);
 		
-		
         
         table = new JTable(model);
         table.setFillsViewportHeight(true);

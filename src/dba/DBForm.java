@@ -8,7 +8,7 @@ import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
 
-import javax.swing.JFrame; 
+import javax.swing.JFrame;
 import javax.swing.JLabel; 
 import javax.swing.JPanel; 
 import javax.swing.JTextField; 
@@ -414,7 +414,7 @@ class DBForm extends JPanel implements ActionListener, DocumentListener, MouseLi
 						
 						if (rowFieldIndex != -1)
 						{
-							rowIndex = fieldList.getTable().convertRowIndexToModel(rowFieldIndex);
+							rowFieldIndex = fieldList.getTable().convertRowIndexToModel(rowFieldIndex);
 							
 							if (rowFieldIndex < tableInfoData.getFields().size())
 							{

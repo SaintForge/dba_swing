@@ -7,10 +7,14 @@ import java.sql.SQLException;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.JTextArea;
+import javax.swing.JScrollPane;
 import javax.swing.JLabel;
 import javax.swing.JTabbedPane;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ChangeEvent;
+import javax.swing.BorderFactory;
+import javax.swing.border.EtchedBorder;
 import java.awt.event.WindowEvent;
 
 import java.awt.Dimension;
@@ -41,11 +45,22 @@ class MainFrame extends JFrame implements ChangeListener, ActionListener
 		
 		for (int i = 0; i < dataList.size(); ++i) 
 		{
+			
+			
+			JTabbedPane toolTab = new JTabbedPane(JTabbedPane.TOP);
+			toolTab.setFont(new Font("Courier New", Font.BOLD, 12));
+			toolTab.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
+			
 			EnvironmentData data = dataList.get(i);
 			
 			DBForm form = new DBForm(data, this);
 			form.getSettingsButton().addActionListener(this);
-			tabs.addTab(data.getSettings().getName(), null, form, null);
+			toolTab.addTab("DBA", null, form, null);
+			
+			toolTab.addTab("Global", null, new GLForm(), null);
+			
+			//tabs.addTab(data.getSettings().getName(), null, form, null);
+			tabs.addTab(data.getSettings().getName(), null, toolTab, null);
 			tabs.setTabComponentAt(i, new ButtonTabComponent(tabs));
 		}
 		
